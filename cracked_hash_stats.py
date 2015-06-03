@@ -8,8 +8,10 @@ __author__ = 'rleese'
 
 import sys
 
-# Change to true to output a list of usernames matched with passwords
+# Change to True to output a list of usernames matched with passwords
 matchPasswordsToUsers = False
+# Change to True to output a list of most popular passwords
+showPopularPasswords = True
 
 # Output file from hashcat in the default [hash]:[cleartext password] format
 hashcatCrackedOuput = file(sys.argv[1], "r")
@@ -17,6 +19,11 @@ hashcatCrackedOuput = file(sys.argv[1], "r")
 # File to output matched user names and passwords
 if matchPasswordsToUsers:
     matchedfile = file("matched.txt", "w")
+
+if showPopularPasswords:
+    popularPasswordsDict = {}
+    # max number of popular passwords to display in the results
+    popularCount = 25
 
 uniqueHashesCracked = 0
 totalHashesCracked = 0
@@ -39,8 +46,22 @@ for line in hashcatCrackedOuput.readlines():
             totalHashesCracked += 1
             if matchPasswordsToUsers:
                 matchedfile.write(cleartextPW + "  " + dumpline.split(":")[0] + "\n")
+            if showPopularPasswords:
+                if popularPasswordsDict.has_key(cleartextPW):
+                    popularPasswordsDict[cleartextPW] = popularPasswordsDict[cleartextPW] + 1
+                else:
+                    popularPasswordsDict[cleartextPW] = 1
+
     hashDumpfile.close()
     uniqueHashesCracked += 1
+
+if showPopularPasswords:
+    loop = 0
+    print 'Top %d popular passwords' % popularCount
+    topPasswordKeys = sorted(popularPasswordsDict.keys(), key=popularPasswordsDict.get, reverse=True)
+    while loop < popularCount:
+        print topPasswordKeys[loop].rstrip() + "    " + str(popularPasswordsDict[topPasswordKeys[loop]])
+        loop += 1
 
 #count number of lines processed
 hashDumpfile = file(sys.argv[2], "r")
@@ -49,9 +70,10 @@ for dumpline in hashDumpfile.readlines():
     allHashSet.add(dumpline.split(":")[1].upper())
 uniqueHashesProcessed = len(allHashSet)
 
+#cleanup
 if matchPasswordsToUsers:
     matchedfile.close()
 hashcatCrackedOuput.close()
 
 print "\n\n%d/%d (%d%%) unique passwords cracked" % (uniqueHashesCracked,uniqueHashesProcessed,round(float(uniqueHashesCracked) / uniqueHashesProcessed * 100))
-print "%d/%d (%d%%) username/password combinations cracked (includes duplicate password across multiple users)" % (totalHashesCracked,totalHashesProcessed,round(float(totalHashesCracked) / totalHashesProcessed * 100))
+print "%d/%d (%d%%) username/password combinations cracked (includes duplicate passwords across multiple users)" % (totalHashesCracked,totalHashesProcessed,round(float(totalHashesCracked) / totalHashesProcessed * 100))
