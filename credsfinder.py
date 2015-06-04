@@ -3,21 +3,19 @@ __author__ = 'jbollin'
 import re
 
 """Function to generate a dictionary that contains usernames as the keys with password and hash.
-Requires the input of file containing username:hash and a hash:crackedpasswords file"""
+Requires the input of lists containing username:hash and a hash:crackedpasswords file"""
 
-def gen_dict_user_pass_hash(user_hash_file, hash_pass_file):
+def gen_dict_user_pass_hash(user_hash_list, hash_pass_list):
     # initialize variables
     userhash = {}       # Dictionary using username as the key and hash as the content.
     hashpass = {}       # Dictionary using hash as the key and password as the content.
     userpasshash = {}   # Dictionary using username as the key and password and hash as the content.
-    with open(user_hash_file, mode="rb") as f:
-        for line in f:
-            username,phash = line.rstrip().split(":")
-            userhash[username] = phash
-    with open(hash_pass_file, mode="rb") as f:
-        for line in f:
-            phash,password = line.rstrip().split(":",1)
-            hashpass[phash] = password
+    for line in user_hash_list:
+        username,phash = line.rstrip().split(":")
+        userhash[username] = phash
+    for line in hash_pass_list:
+        phash,password = line.rstrip().split(":",1)
+        hashpass[phash] = password
     for user in userhash.keys():
         passwordquery = hashpass[userhash[user]]
         hashquery = userhash[user]
