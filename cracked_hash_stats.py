@@ -8,6 +8,7 @@ Usage: cracked-hash-stats.py [hashcat cracked passwords file] [full hash list pa
 '''
 
 import sys
+import re
 
 # Change to True to output a list of usernames matched with passwords
 matchPasswordsToUsers = False
@@ -15,8 +16,36 @@ matchPasswordsToUsers = False
 showPopularPasswords = True
 # Ignore the latest history entry for every use because it's always the same as the user's current password
 ignoreHistory0 = True
+# Show stats for both modern and history passwords at the same time
+showCombinedStats = True
 # Show a separate stats blocks for history passwords and non-history passwords
-showSplitStats = True
+showModernStats = True
+# Show a separate stats block for history passwords
+showHistoryStats = True
+
+hashcatOutputArgument = sys.argv[1]
+ntdsDumpArgument = sys.argv[2]
+ntdsDumpCombined = []
+if showModernStats:
+    ntdsDumpModern = []
+if showHistoryStats:
+    ntdsDumpHistory = []
+
+#create processed ntds dumps based on the options specified above
+with open(ntdsDumpArgument, 'r') as ntdsDumpFile:
+    for line in ntdsDumpFile.readlines():
+        if ignoreHistory0 and line.find('_history0'):
+            break
+        else:
+            ntdsDumpCombined.append(line.rstrip())
+
+        if showModernStats:
+            if not line.find('_history'):
+                ntdsDumpModern.append(line.rstrip())
+
+        if showHistoryStats:
+            if line.find('history'):
+                ntdsDumpHistory.append(line.rstrip())
 
 # Output file from hashcat in the default [hash]:[cleartext password] format
 hashcatCrackedOuput = file(sys.argv[1], "r")
@@ -32,11 +61,8 @@ if showPopularPasswords:
 
 uniqueHashesCracked = 0
 uniqueHashesCrackedNoHistory = 0
-totalHashesCracked = 0
-totalHashesProcessed = 0
-history0HashesCrackedSet = []
-history0HashesProcessedSet = []
-uniqueHistory0HashesCracked = 0
+usernameHashCombosCracked = 0
+usernameHashCombosProcessed = 0
 
 # A set used to calculate the number of unique hashes in the hashcatCrackedOuput
 allHashSet = set()
@@ -52,13 +78,7 @@ for line in hashcatCrackedOuput.readlines():
     hashDumpfile = file(sys.argv[2], "r")
     for dumpline in hashDumpfile.readlines():
         if dumpline.upper().find(hash) >= 0:
-            if ignoreHistory0:
-                if dumpline.find('_nthistory0') == -1:
-                    totalHashesCracked += 1
-                else:
-                    history0HashesCrackedSet.add(dumpline.split(':')[1].upper())
-            else:
-                totalHashesCracked += 1
+            usernameHashCombosCracked += 1
             if matchPasswordsToUsers:
                 matchedfile.write(cleartextPW + "  " + dumpline.split(":")[0] + "\n")
             if showPopularPasswords:
@@ -68,10 +88,6 @@ for line in hashcatCrackedOuput.readlines():
                     popularPasswordsDict[cleartextPW] = 1
     hashDumpfile.close()
     uniqueHashesCracked += 1
-
-if ignoreHistory0:
-    uniqueHistory0HashesCracked = len(history0HashesCrackedSet)
-    uniqueHashesCracked = uniqueHashesCracked - uniqueHistory0HashesCracked
 
 # Print the top popular passwords
 if showPopularPasswords:
@@ -86,13 +102,9 @@ if showPopularPasswords:
 # May be able to combine this loop with the one above (or not since it needs run only once) ^^^
 hashDumpfile = file(sys.argv[2], "r")
 for dumpline in hashDumpfile.readlines():
-    if ignoreHistory0:
-        if dumpline.find('_nthistory0') == -1:
-            totalHashesProcessed += 1
-        else:
-            history0HashesProcessedSet.add(dumplin)
+    usernameHashCombosProcessed += 1
     else:
-        totalHashesProcessed += 1
+        usernameHashCombosProcessed += 1
     allHashSet.add(dumpline.split(":")[1].upper())
 uniqueHashesProcessed = len(allHashSet)
 
@@ -102,6 +114,6 @@ if matchPasswordsToUsers:
 hashcatCrackedOuput.close()
 
 print "\n\n%d/%d (%d%%) unique passwords cracked" % (uniqueHashesCracked,uniqueHashesProcessed,round(float(uniqueHashesCracked) / uniqueHashesProcessed * 100))
-print "%d/%d (%d%%) username/password combinations cracked (includes duplicate passwords across multiple users)" % (totalHashesCracked,totalHashesProcessed,round(float(totalHashesCracked) / totalHashesProcessed * 100))
+print "%d/%d (%d%%) username/password combinations cracked (includes duplicate passwords across multiple users)" % (usernameHashCombosCracked,usernameHashCombosProcessed,round(float(usernameHashCombosCracked) / usernameHashCombosProcessed * 100))
 if ignoreHistory0:
     print "'*_nthistory0' entries ignored"
