@@ -1,5 +1,5 @@
-__author__ = 'rleese'
 # !/usr/bin/python
+__author__ = 'rleese'
 '''
 Processes a cracked password list from hashcat, compares it to the full original hash dump and spits out statstics
 about the cracked passwords.
@@ -10,10 +10,12 @@ Usage: cracked-hash-stats.py [hashcat cracked passwords file] [full hash list pa
 import sys
 import credsfinder
 
+
 def runstats(hashcatOutput, ntdsDump):
+    allHashSet = set()
+    crackedHashSet = set()
 
     # Determine the number of unique hashes processed by placing all ntds dump lines in a set
-    allHashSet = set()
     for dumpline in ntdsDump:
         allHashSet.add(dumpline.split(":")[1].upper())
     uniqueHashesProcessed = len(allHashSet)
@@ -41,7 +43,6 @@ def runstats(hashcatOutput, ntdsDump):
     usernameHashCombosCracked = len(crackedCreds)
 
     if showPopularPasswords:
-        for password in
         if popularPasswordsDict.has_key(clearTextPW):
             popularPasswordsDict[clearTextPW] = popularPasswordsDict[clearTextPW] + 1
         else:
@@ -62,10 +63,11 @@ def runstats(hashcatOutput, ntdsDump):
     print "\n\n%d/%d (%d%%) unique passwords cracked" % (uniqueHashesCracked,uniqueHashesProcessed,round(float(uniqueHashesCracked) / uniqueHashesProcessed * 100))
     print "%d/%d (%d%%) username/password combinations cracked (includes duplicate passwords across multiple users)" % (usernameHashCombosCracked,usernameHashCombosProcessed,round(float(usernameHashCombosCracked) / usernameHashCombosProcessed * 100))
     if ignoreHistory0:
-        print "%d 'history0' hashes ignored" % history0hashes
+        print "%d 'history0' hashes ignored\n\n" % history0hashes
 
 
     return uniqueHashesProcessed, uniqueHashesCracked, usernameHashCombosProcessed, usernameHashCombosCracked, popularPasswordsDict
+
 
 # Change to True to output a list of usernames matched with passwords
 matchPasswordsToUsers = False
@@ -92,25 +94,10 @@ ntdsDumpCombined = []
 ntdsDumpModern = []
 ntdsDumpHistory = []
 
-uniqueHashesProcessedCombined = 0
-uniqueHashesCrackedCombined = 0
-usernameHashCombosProcessedCombined = 0
-usernameHashCombosCrackedCombined = 0
-
-uniqueHashesProcessedModern = 0
-uniqueHashesCrackedModern = 0
-usernameHashCombosProcessedModern = 0
-usernameHashCombosCrackedModern = 0
-
-uniqueHashesProcessedHistory = 0
-uniqueHashesCrackedHistory = 0
-usernameHashCombosProcessedHistory = 0
-usernameHashCombosCrackedHistory = 0
-
 history0hashes = 0
 
 
-#create processed ntds dumps based on the options specified above. These will be input in to runstats()
+# create processed ntds dumps based on the options specified above. These will be input in to runstats()
 with open(ntdsDumpArgument, 'r') as ntdsDumpFile:
     for line in ntdsDumpFile.readlines():
         if ignoreHistory0 and line.find('_history0'):
@@ -123,7 +110,7 @@ with open(ntdsDumpArgument, 'r') as ntdsDumpFile:
                 if not line.find('_history'):
                     ntdsDumpModern.append(line.rstrip())
             if showHistoryStats:
-                if line.find('history'):
+                if line.find('_history'):
                     ntdsDumpHistory.append(line.rstrip())
 
 # # File to output matched user names and passwords
@@ -152,9 +139,3 @@ if showHistoryStats:
          "     History Password Stats     " \
          "********************************"
     runstats(hashcatOutput, ntdsDumpHistory)
-
-
-
-
-
-
