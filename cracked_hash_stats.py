@@ -62,38 +62,38 @@ def runstats(hashcatOutput, ntdsDump):
                 break
             loop += 1
 
-    print "\n\n%d/%d (%d%%) unique passwords cracked" % (uniqueHashesCracked,uniqueHashesProcessed,round(float(uniqueHashesCracked) / uniqueHashesProcessed * 100))
-    print "%d/%d (%d%%) username/password combinations cracked (includes duplicate passwords across multiple users)" % (usernameHashCombosCracked,usernameHashCombosProcessed,round(float(usernameHashCombosCracked) / usernameHashCombosProcessed * 100))
+    print "\n\n%d/%d (%d%%) unique passwords cracked" % \
+                                             (uniqueHashesCracked,
+                                              uniqueHashesProcessed,
+                                              round(float(uniqueHashesCracked) / uniqueHashesProcessed * 100)
+                                             )
+    print "%d/%d (%d%%) username/password combinations cracked (includes duplicate passwords across multiple users)" % \
+                                            (usernameHashCombosCracked,
+                                             usernameHashCombosProcessed,
+                                             round(float(usernameHashCombosCracked) / usernameHashCombosProcessed * 100)
+                                            )
     if ignoreHistory0:
         print "\n%d 'history0' hashes ignored\n\n" % history0hashes
 
     return
 
-
-# Change to True to output a list of usernames matched with passwords
-matchPasswordsToUsers = False
-# Change to True to output a list of most popular passwords
-showPopularPasswords = True
-# Number of popular passwords to show
-popularPasswordCount = 100
-# Ignore the latest history entry for every use because it's always the same as the user's current password
-ignoreHistory0 = True
-# Show stats for both modern and history passwords at the same time
-showCombinedStats = True
-# Show a separate stats blocks for history passwords and non-history passwords
-showModernStats = True
-# Show a separate stats block for history passwords
-showHistoryStats = True
-
-# Prepare variables
+# Define global variables defaults
+matchPasswordsToUsers = False # Change to True to output a list of usernames matched with passwords
+showPopularPasswords = True # Change to True to output a list of most popular passwords
+popularPasswordCount = 100 # Number of popular passwords to show
+ignoreHistory0 = True # Ignore history0 entry because history0 is current password
+showCombinedStats = True # Show stats for both modern and history passwords at the same time
+showModernStats = True # Show a separate stats blocks for history passwords and non-history passwords
+showHistoryStats = True # Show a separate stats block for history passwords
 hashcatOutputArgument = sys.argv[1]
 ntdsDumpArgument = sys.argv[2]
 
+# Initialize global variables defaults
 ntdsDumpCombined = []
 ntdsDumpModern = []
 ntdsDumpHistory = []
-
 history0hashes = 0
+
 
 
 # create processed ntds dumps based on the options specified above. These will be input in to runstats()
@@ -134,6 +134,6 @@ if showModernStats:
 
 if showHistoryStats:
     print"********************************" \
-         "     History Password Stats     " \
+         "     Modern Password Stats      " \
          "********************************"
     runstats(hashcatOutput, ntdsDumpHistory)
