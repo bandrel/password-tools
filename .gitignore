@@ -46,3 +46,5 @@ Temporary Items
 .idea/
 *.xml
 testfiles/
+*.txt
+*.pyc
