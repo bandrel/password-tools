@@ -134,6 +134,6 @@ if showModernStats:
 
 if showHistoryStats:
     print"********************************" \
-         "     Modern Password Stats      " \
+         "     History Password Stats      " \
          "********************************"
     runstats(hashcatOutput, ntdsDumpHistory)
