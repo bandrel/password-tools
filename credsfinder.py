@@ -16,10 +16,15 @@ def gen_dict_user_pass_hash(user_hash_list, hash_pass_list):
     for line in hash_pass_list:
         phash,password = line.rstrip().split(":",1)
         hashpass[phash] = password
+    # Combine the userhash and userpass dictionaries in to a single userpasshash dictionary.
     for user in userhash.keys():
-        passwordquery = hashpass[userhash[user]]
-        hashquery = userhash[user]
-        userpasshash[user] = [passwordquery,hashquery]
+        try:
+            passwordquery = hashpass[userhash[user]]
+            hashquery = userhash[user]
+            userpasshash[user] = [passwordquery,hashquery]
+        except KeyError:
+            # User doesn't have a cracked password
+            pass
     return userpasshash
 
 def query_dic(userquery,dic):
