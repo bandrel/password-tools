@@ -15,14 +15,14 @@ def runstats(hashcatOutput, ntdsDump):
     allHashSet = set()
     crackedHashSet = set()
     popularPasswordsDict = {}
-
+    global uncracked
     # Determine the number of unique hashes processed by placing all ntds dump lines in a set
     for dumpline in ntdsDump:
         allHashSet.add(dumpline.split(":")[1].upper())
     uniqueHashesProcessed = len(allHashSet)
 
     # Make a dictionary of all users with cracked passwords. Username is the key. Value returned is [plaintextPW,hash]
-    crackedCreds = credsfinder.gen_dict_user_pass_hash(ntdsDump, hashcatOutput)
+    crackedCreds,uncracked = credsfinder.gen_dict_user_pass_hash(ntdsDump, hashcatOutput)
 
     # Determine the number of unique hashes cracked by placing all hashes from the cracked Creds dictionary in to a set.
     for userCreds in crackedCreds.values():
@@ -43,6 +43,19 @@ def runstats(hashcatOutput, ntdsDump):
     # Determine the number of username/hash combos cracked
     usernameHashCombosCracked = len(crackedCreds)
 
+    print "%d/%d (%d%%) unique passwords cracked" % \
+          (uniqueHashesCracked,
+           uniqueHashesProcessed,
+           round(float(uniqueHashesCracked) / uniqueHashesProcessed * 100)
+          )
+    print "%d/%d (%d%%) username/password combinations cracked (includes duplicate passwords across multiple users)\n" % \
+          (usernameHashCombosCracked,
+           usernameHashCombosProcessed,
+           round(float(usernameHashCombosCracked) / usernameHashCombosProcessed * 100)
+          )
+    if ignoreHistory0:
+        print "%d 'history0' hashes ignored\n" % history0hashes
+
     if showPopularPasswords:
         # Print the stats. These final blocks could easily be broken in to a separate funtion, and instead have this
         # function return uniqueHashesProcessed, uniqueHashesCracked, usernameHashCombosProcessed,
@@ -50,7 +63,7 @@ def runstats(hashcatOutput, ntdsDump):
 
         # Print the top popular passwords
         loop = 0
-        print '\nTop %d popular passwords:\n' % popularPasswordCount
+        print 'Top %d popular passwords:' % popularPasswordCount
         # Process and sort the passwords in popularPasswords dictionary
         topPasswordKeys = sorted(popularPasswordsDict.keys(), key=popularPasswordsDict.get, reverse=True)
         while loop < popularPasswordCount:
@@ -60,20 +73,9 @@ def runstats(hashcatOutput, ntdsDump):
                 print "\nInfo: Not enough unique cracked passwords available to fully fill the popular passwords list"
                 break
             loop += 1
-
-    print "\n\n%d/%d (%d%%) unique passwords cracked" % \
-          (uniqueHashesCracked,
-           uniqueHashesProcessed,
-           round(float(uniqueHashesCracked) / uniqueHashesProcessed * 100)
-          )
-    print "%d/%d (%d%%) username/password combinations cracked (includes duplicate passwords across multiple users)" % \
-          (usernameHashCombosCracked,
-           usernameHashCombosProcessed,
-           round(float(usernameHashCombosCracked) / usernameHashCombosProcessed * 100)
-          )
-    if ignoreHistory0:
-        print "\n%d 'history0' hashes ignored\n\n" % history0hashes
-
+        print ''
+        print '*********************************************************************************************************'
+        print''
     return
 
 
@@ -98,6 +100,7 @@ ignoreHistory0 = True  # Ignore history0 entry because history0 is current passw
 showCombinedStats = False  # Show stats for both modern and history passwords at the same time
 showModernStats = False  # Show a separate stats blocks for history passwords and non-history passwords
 showHistoryStats = False  # Show a separate stats block for history passwords
+showUncracked = True
 
 
 if sys.argv.__len__() < 4:# if no options are specified use default options
@@ -136,7 +139,7 @@ ntdsDumpCombined = []
 ntdsDumpModern = []
 ntdsDumpHistory = []
 history0hashes = 0
-
+uncracked = []
 
 
 # create processed ntds dumps based on the options specified above. These will be input in to runstats()
@@ -154,9 +157,6 @@ with open(ntdsDumpArgument, 'r') as ntdsDumpFile:
                 if line.find('_nthistory') > -1:
                     ntdsDumpHistory.append(line.rstrip())
 
-# # File to output matched user names and passwords
-#if matchPasswordsToUsers:
-#     matchedfile = file("matched.txt", "w")
 
 # Prepare contents of the hashcat output file for multiple uses
 with open(hashcatOutputArgument, 'r') as hashcatOutputFile:
@@ -164,13 +164,20 @@ with open(hashcatOutputArgument, 'r') as hashcatOutputFile:
 
 # Where the real work begins
 if showCombinedStats:
-    print "********************************    Combined Password Stats     ********************************"
+    print "********************************    Combined Password Stats     *****************************************"
     runstats(hashcatOutput, ntdsDumpCombined)
 
 if showModernStats:
-    print "********************************     Modern Password Stats      ********************************"
+    print "********************************     Modern Password Stats      *****************************************"
     runstats(hashcatOutput, ntdsDumpModern)
 
 if showHistoryStats:
-    print"********************************     History Password Stats      ********************************"
+    print "********************************     History Password Stats      ****************************************"
     runstats(hashcatOutput, ntdsDumpHistory)
+
+if showUncracked:
+    print "********************************     Passwords not cracked Stats ****************************************"
+    print ""
+    print "Total number of passwords not cracked %d" % len(uncracked)
+    for user in uncracked:
+        print user
