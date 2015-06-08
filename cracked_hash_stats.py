@@ -104,7 +104,7 @@ showHistoryStats = False  # Show a separate stats block for history passwords
 showUncracked = False   # Show a separate stats block for usernames with uncracked passwords
 
 
-if sys.argv.__len__() < 4:# if no options are specified use default options
+if len(sys.argv) < 4:# if no options are specified use default options
     showModernStats = True  # Show a separate stats blocks for history passwords and non-history passwords
     showHistoryStats = True  # Show a separate stats block for history passwords
 
