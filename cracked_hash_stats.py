@@ -89,7 +89,8 @@ def helpmsg():
           "                    output when using the -p option\n" \
           "  -M or --modern: Prints the statistics for current passwords. \n" \
           "  -H or --history: Prints the statistics for history passwords\n" \
-          "  -C or --combined: Shows statistics for both current and historical passwords\n"
+          "  -C or --combined: Shows statistics for both current and historical passwords\n"\
+          "  -u or --uncracked: Prints statistics for usernames with uncracked passwords\n"
     return
 
 # Set defaults if command arguments are not used
@@ -100,7 +101,7 @@ ignoreHistory0 = True  # Ignore history0 entry because history0 is current passw
 showCombinedStats = False  # Show stats for both modern and history passwords at the same time
 showModernStats = False  # Show a separate stats blocks for history passwords and non-history passwords
 showHistoryStats = False  # Show a separate stats block for history passwords
-showUncracked = True
+showUncracked = False   # Show a separate stats block for usernames with uncracked passwords
 
 
 if sys.argv.__len__() < 4:# if no options are specified use default options
@@ -108,8 +109,8 @@ if sys.argv.__len__() < 4:# if no options are specified use default options
     showHistoryStats = True  # Show a separate stats block for history passwords
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "hm:pc:CMH",
-                               ["help", "popular", "popcount=", "combined", "modern", "history"])
+    opts, args = getopt.getopt(sys.argv[1:], "hm:pc:CMHu",
+                               ["help", "popular", "popcount=", "combined", "modern", "history","uncracked="])
 except getopt.GetoptError as err:
     helpmsg()
     print str(err)
@@ -128,6 +129,8 @@ for opt, arg in opts:
         showModernStats = True
     elif opt in ("-H", "--history"):
         showHistoryStats = True
+    elif opt in ("-u", "--uncracked"):
+        showUncracked = True
 try:
     hashcatOutputArgument = args[0]
     ntdsDumpArgument = args[1]
