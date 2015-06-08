@@ -10,7 +10,6 @@ Usage: cracked-hash-stats.py [hashcat cracked passwords file] [full hash list pa
 import sys
 import credsfinder
 import getopt
-import operator
 def runstats(hashcatOutput, ntdsDump):
     allHashSet = set()
     crackedHashSet = set()
@@ -76,6 +75,12 @@ def runstats(hashcatOutput, ntdsDump):
         print "\n%d 'history0' hashes ignored\n\n" % history0hashes
 
     return
+def toggle(x):
+    if x is True:
+        x = False
+    else:
+        x = True
+    return x
 
 
 #Set defaults if command arguments are not used
@@ -104,15 +109,15 @@ for opt, arg in opts:
               'cracked_hash_stats.py --hashcat <hashcat file> --ntds <ntds file>\n'
         sys.exit()
     elif opt in ("-p", "--popular"):
-        showPopularPasswords = operator.not_(showPopularPasswords)
+        showPopularPasswords = toggle(showPopularPasswords)
     elif opt in ("-c", "--popcount"):
         popularPasswordCount = int(arg)
     elif opt in ("-C", "--combined"):
-        showCombinedStats = operator.not_(showCombinedStats)
+        showCombinedStats = toggle(showCombinedStats)
     elif opt in ("-M", "--modern"):
-        showModernStats = operator.not_(showModernStats)
+        showModernStats = toggle(showModernStats)
     elif opt in ("-H", "--history"):
-        showHistoryStats = operator.not_(showHistoryStats)
+        showHistoryStats = toggle(showHistoryStats)
 
 hashcatOutputArgument = args[0]
 ntdsDumpArgument = args[1]
@@ -151,13 +156,19 @@ with open(hashcatOutputArgument, 'r') as hashcatOutputFile:
 
 # Where the real work begins
 if showCombinedStats:
-    print "********************************    Combined Password Stats     ********************************"
+    print "********************************" \
+          "    Combined Password Stats     " \
+          "********************************"
     runstats(hashcatOutput, ntdsDumpCombined)
 
 if showModernStats:
-    print"********************************     Modern Password Stats      ********************************"
+    print"********************************" \
+         "     Modern Password Stats      " \
+         "********************************"
     runstats(hashcatOutput, ntdsDumpModern)
 
 if showHistoryStats:
-    print"********************************     History Password Stats      ********************************"
+    print"********************************" \
+         "     History Password Stats      " \
+         "********************************"
     runstats(hashcatOutput, ntdsDumpHistory)
