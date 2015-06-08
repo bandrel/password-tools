@@ -43,6 +43,19 @@ def runstats(hashcatOutput, ntdsDump):
     # Determine the number of username/hash combos cracked
     usernameHashCombosCracked = len(crackedCreds)
 
+    print "%d/%d (%d%%) unique passwords cracked" % \
+          (uniqueHashesCracked,
+           uniqueHashesProcessed,
+           round(float(uniqueHashesCracked) / uniqueHashesProcessed * 100)
+          )
+    print "%d/%d (%d%%) username/password combinations cracked (includes duplicate passwords across multiple users)\n" % \
+          (usernameHashCombosCracked,
+           usernameHashCombosProcessed,
+           round(float(usernameHashCombosCracked) / usernameHashCombosProcessed * 100)
+          )
+    if ignoreHistory0:
+        print "%d 'history0' hashes ignored\n" % history0hashes
+
     if showPopularPasswords:
         # Print the stats. These final blocks could easily be broken in to a separate funtion, and instead have this
         # function return uniqueHashesProcessed, uniqueHashesCracked, usernameHashCombosProcessed,
@@ -50,7 +63,7 @@ def runstats(hashcatOutput, ntdsDump):
 
         # Print the top popular passwords
         loop = 0
-        print '\nTop %d popular passwords:\n' % popularPasswordCount
+        print 'Top %d popular passwords:' % popularPasswordCount
         # Process and sort the passwords in popularPasswords dictionary
         topPasswordKeys = sorted(popularPasswordsDict.keys(), key=popularPasswordsDict.get, reverse=True)
         while loop < popularPasswordCount:
@@ -60,20 +73,9 @@ def runstats(hashcatOutput, ntdsDump):
                 print "\nInfo: Not enough unique cracked passwords available to fully fill the popular passwords list"
                 break
             loop += 1
-
-    print "\n\n%d/%d (%d%%) unique passwords cracked" % \
-          (uniqueHashesCracked,
-           uniqueHashesProcessed,
-           round(float(uniqueHashesCracked) / uniqueHashesProcessed * 100)
-          )
-    print "%d/%d (%d%%) username/password combinations cracked (includes duplicate passwords across multiple users)" % \
-          (usernameHashCombosCracked,
-           usernameHashCombosProcessed,
-           round(float(usernameHashCombosCracked) / usernameHashCombosProcessed * 100)
-          )
-    if ignoreHistory0:
-        print "\n%d 'history0' hashes ignored\n\n" % history0hashes
-
+        print ''
+        print '*********************************************************************************************************'
+        print''
     return
 
 
@@ -164,13 +166,13 @@ with open(hashcatOutputArgument, 'r') as hashcatOutputFile:
 
 # Where the real work begins
 if showCombinedStats:
-    print "********************************    Combined Password Stats     ********************************"
+    print "********************************    Combined Password Stats     *****************************************"
     runstats(hashcatOutput, ntdsDumpCombined)
 
 if showModernStats:
-    print "********************************     Modern Password Stats      ********************************"
+    print "********************************     Modern Password Stats      *****************************************"
     runstats(hashcatOutput, ntdsDumpModern)
 
 if showHistoryStats:
-    print"********************************     History Password Stats      ********************************"
+    print "********************************     History Password Stats      ****************************************"
     runstats(hashcatOutput, ntdsDumpHistory)
