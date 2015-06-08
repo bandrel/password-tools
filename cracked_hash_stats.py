@@ -80,8 +80,10 @@ def runstats(hashcatOutput, ntdsDump):
 def helpmsg():
     print "Usage: cracked_hash_stats.py [Options] {<hashcat file> <ntds file>}\n"\
           "  -h or --help:  This help screen\n"\
-          "  -p or --popular: Prints a list of most popular passwords. Defaults to top 100.  Use -c to change count \n"\
-          "  -c or --popcount: Changes the default number of popular passwords output when using the -p option\n"\
+          "  -p or --popular: Prints a list of most popular passwords.\n" \
+          "                   Defaults to top 100.  Use -c to change count.\n"\
+          "  -c or --popcount: Changes the default number of popular passwords\n" \
+          "                    output when using the -p option\n"\
           "  -M or --modern: Prints the statistics for current passwords. \n"\
           "  -H or --history: Prints the statistics for history passwords\n"\
           "  -C or --combined: Shows statistics for both current and historical passwords\n"
@@ -117,11 +119,12 @@ for opt, arg in opts:
         showModernStats = operator.not_(showModernStats)
     elif opt in ("-H", "--history"):
         showHistoryStats = operator.not_(showHistoryStats)
-
-hashcatOutputArgument = args[0]
-ntdsDumpArgument = args[1]
-
-
+try:
+    hashcatOutputArgument = args[0]
+    ntdsDumpArgument = args[1]
+except IndexError:
+    helpmsg()
+    sys.exit(2)
 # Initialize global variables defaults
 ntdsDumpCombined = []
 ntdsDumpModern = []
