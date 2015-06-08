@@ -94,17 +94,16 @@ def helpmsg():
     return
 
 # Set defaults if command arguments are not used
-matchPasswordsToUsers = False  # Change to True to output a list of usernames matched with passwords
-showPopularPasswords = False  # Change to True to output a list of most popular passwords
+showPopularPasswords = False  # Show a list of most popular passwords
 popularPasswordCount = 100  # Number of popular passwords to show
-ignoreHistory0 = True  # Ignore history0 entry because history0 is current password
+ignoreHistory0 = True  # Ignore history0 entries because history0 is current password
 showCombinedStats = False  # Show stats for both modern and history passwords at the same time
 showModernStats = False  # Show a separate stats blocks for history passwords and non-history passwords
 showHistoryStats = False  # Show a separate stats block for history passwords
 showUncracked = False   # Show a separate stats block for usernames with uncracked passwords
 
 
-if sys.argv.__len__() < 4:# if no options are specified use default options
+if sys.argv.__len__() < 4:# If no options are specified, use default options
     showModernStats = True  # Show a separate stats blocks for history passwords and non-history passwords
     showHistoryStats = True  # Show a separate stats block for history passwords
 
