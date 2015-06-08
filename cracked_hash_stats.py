@@ -15,14 +15,14 @@ def runstats(hashcatOutput, ntdsDump):
     allHashSet = set()
     crackedHashSet = set()
     popularPasswordsDict = {}
-
+    global uncracked
     # Determine the number of unique hashes processed by placing all ntds dump lines in a set
     for dumpline in ntdsDump:
         allHashSet.add(dumpline.split(":")[1].upper())
     uniqueHashesProcessed = len(allHashSet)
 
     # Make a dictionary of all users with cracked passwords. Username is the key. Value returned is [plaintextPW,hash]
-    crackedCreds = credsfinder.gen_dict_user_pass_hash(ntdsDump, hashcatOutput)
+    crackedCreds,uncracked = credsfinder.gen_dict_user_pass_hash(ntdsDump, hashcatOutput)
 
     # Determine the number of unique hashes cracked by placing all hashes from the cracked Creds dictionary in to a set.
     for userCreds in crackedCreds.values():
@@ -100,6 +100,7 @@ ignoreHistory0 = True  # Ignore history0 entry because history0 is current passw
 showCombinedStats = False  # Show stats for both modern and history passwords at the same time
 showModernStats = False  # Show a separate stats blocks for history passwords and non-history passwords
 showHistoryStats = False  # Show a separate stats block for history passwords
+showUncracked = True
 
 
 if sys.argv.__len__() < 4:# if no options are specified use default options
@@ -138,7 +139,7 @@ ntdsDumpCombined = []
 ntdsDumpModern = []
 ntdsDumpHistory = []
 history0hashes = 0
-
+uncracked = []
 
 
 # create processed ntds dumps based on the options specified above. These will be input in to runstats()
@@ -156,9 +157,6 @@ with open(ntdsDumpArgument, 'r') as ntdsDumpFile:
                 if line.find('_nthistory') > -1:
                     ntdsDumpHistory.append(line.rstrip())
 
-# # File to output matched user names and passwords
-#if matchPasswordsToUsers:
-#     matchedfile = file("matched.txt", "w")
 
 # Prepare contents of the hashcat output file for multiple uses
 with open(hashcatOutputArgument, 'r') as hashcatOutputFile:
@@ -176,3 +174,10 @@ if showModernStats:
 if showHistoryStats:
     print "********************************     History Password Stats      ****************************************"
     runstats(hashcatOutput, ntdsDumpHistory)
+
+if showUncracked:
+    print "********************************     Passwords not cracked Stats ****************************************"
+    print ""
+    print "Total number of passwords not cracked %d" % len(uncracked)
+    for user in uncracked:
+        print user
