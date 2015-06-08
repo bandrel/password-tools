@@ -77,7 +77,15 @@ def runstats(hashcatOutput, ntdsDump):
         print "\n%d 'history0' hashes ignored\n\n" % history0hashes
 
     return
-
+def helpmsg():
+    print "Usage: cracked_hash_stats.py [Options] {<hashcat file> <ntds file>}\n"\
+          "  -h or --help:  This help screen\n"\
+          "  -p or --popular: Prints a list of most popular passwords. Defaults to top 100.  Use -c to change count \n"\
+          "  -c or --popcount: Changes the default number of popular passwords output when using the -p option\n"\
+          "  -M or --modern: Prints the statistics for current passwords. \n"\
+          "  -H or --history: Prints the statistics for history passwords\n"\
+          "  -C or --combined: Shows statistics for both current and historical passwords\n"
+    return
 #Set defaults if command arguments are not used
 matchPasswordsToUsers = False # Change to True to output a list of usernames matched with passwords
 showPopularPasswords = False # Change to True to output a list of most popular passwords
@@ -92,16 +100,12 @@ try:
     opts, args = getopt.getopt(sys.argv[1:],"hm:pc:CMH",["help","hashcat=","ntds=","match=","popular","popcount=",
                                                           "combined","modern","history"])
 except getopt.GetoptError as err:
-    print 'cracked_hash_stats.py -1 <hashcat file> -2 [ntds] \n' \
-          ' OR \n' \
-          'cracked_hash_stats.py --hashcat <hashcat file> --ntds <ntds file>\n'
+    helpmsg()
     print str(err)
     sys.exit(2)
 for opt, arg in opts:
     if opt in ("-h", "--help"):
-        print 'cracked_hash_stats.py -1 <hashcat file> -2 [ntds] \n' \
-              ' OR \n' \
-              'cracked_hash_stats.py --hashcat <hashcat file> --ntds <ntds file>\n'
+        helpmsg()
         sys.exit()
     elif opt in ("-p", "--popular"):
         showPopularPasswords = operator.not_(showPopularPasswords)
