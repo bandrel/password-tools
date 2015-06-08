@@ -9,8 +9,7 @@ Usage: cracked-hash-stats.py [hashcat cracked passwords file] [full hash list pa
 
 import sys
 import credsfinder
-
-
+import getopt
 def runstats(hashcatOutput, ntdsDump):
     allHashSet = set()
     crackedHashSet = set()
@@ -76,17 +75,53 @@ def runstats(hashcatOutput, ntdsDump):
         print "\n%d 'history0' hashes ignored\n\n" % history0hashes
 
     return
+def toggle(x):
+    if x is True:
+        x = False
+    else:
+        x = True
+    return x
 
-# Define global variables defaults
+
+#Set defaults if command arguments are not used
 matchPasswordsToUsers = False # Change to True to output a list of usernames matched with passwords
-showPopularPasswords = True # Change to True to output a list of most popular passwords
+showPopularPasswords = False # Change to True to output a list of most popular passwords
 popularPasswordCount = 100 # Number of popular passwords to show
 ignoreHistory0 = True # Ignore history0 entry because history0 is current password
-showCombinedStats = True # Show stats for both modern and history passwords at the same time
+showCombinedStats = False # Show stats for both modern and history passwords at the same time
 showModernStats = True # Show a separate stats blocks for history passwords and non-history passwords
 showHistoryStats = True # Show a separate stats block for history passwords
-hashcatOutputArgument = sys.argv[1]
-ntdsDumpArgument = sys.argv[2]
+matchedfile = ""
+#System arguments for input and output files
+try:
+    opts, args = getopt.getopt(sys.argv[1:],"hm:pc:CMH",["help","hashcat=","ntds=","match=","popular","popcount=",
+                                                          "combined","modern","history"])
+except getopt.GetoptError as err:
+    print 'cracked_hash_stats.py -1 <hashcat file> -2 [ntds] \n' \
+          ' OR \n' \
+          'cracked_hash_stats.py --hashcat <hashcat file> --ntds <ntds file>\n'
+    print str(err)
+    sys.exit(2)
+for opt, arg in opts:
+    if opt in ("-h", "--help"):
+        print 'cracked_hash_stats.py -1 <hashcat file> -2 [ntds] \n' \
+              ' OR \n' \
+              'cracked_hash_stats.py --hashcat <hashcat file> --ntds <ntds file>\n'
+        sys.exit()
+    elif opt in ("-p", "--popular"):
+        showPopularPasswords = toggle(showPopularPasswords)
+    elif opt in ("-c", "--popcount"):
+        popularPasswordCount = int(arg)
+    elif opt in ("-C", "--combined"):
+        showCombinedStats = toggle(showCombinedStats)
+    elif opt in ("-M", "--modern"):
+        showModernStats = toggle(showModernStats)
+    elif opt in ("-H", "--history"):
+        showHistoryStats = toggle(showHistoryStats)
+
+hashcatOutputArgument = args[0]
+ntdsDumpArgument = args[1]
+
 
 # Initialize global variables defaults
 ntdsDumpCombined = []
@@ -112,7 +147,7 @@ with open(ntdsDumpArgument, 'r') as ntdsDumpFile:
                     ntdsDumpHistory.append(line.rstrip())
 
 # # File to output matched user names and passwords
-# if matchPasswordsToUsers:
+#if matchPasswordsToUsers:
 #     matchedfile = file("matched.txt", "w")
 
 # Prepare contents of the hashcat output file for multiple uses
