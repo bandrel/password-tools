@@ -9,7 +9,7 @@ Usage: cracked-hash-stats.py [hashcat cracked passwords file] [full hash list pa
 
 import sys
 import credsfinder
-
+import getopt
 
 def runstats(hashcatOutput, ntdsDump):
     allHashSet = set()
@@ -43,11 +43,10 @@ def runstats(hashcatOutput, ntdsDump):
     # Determine the number of username/hash combos cracked
     usernameHashCombosCracked = len(crackedCreds)
 
-
     if showPopularPasswords:
-    # Print the stats. These final blocks could easily be broken in to a separate funtion, and instead have this
-    # function return uniqueHashesProcessed, uniqueHashesCracked, usernameHashCombosProcessed,
-    # usernameHashCombosCracked, popularPasswordsDict
+        # Print the stats. These final blocks could easily be broken in to a separate funtion, and instead have this
+        # function return uniqueHashesProcessed, uniqueHashesCracked, usernameHashCombosProcessed,
+        # usernameHashCombosCracked, popularPasswordsDict
 
         # Print the top popular passwords
         loop = 0
@@ -63,31 +62,75 @@ def runstats(hashcatOutput, ntdsDump):
             loop += 1
 
     print "\n\n%d/%d (%d%%) unique passwords cracked" % \
-                                             (uniqueHashesCracked,
-                                              uniqueHashesProcessed,
-                                              round(float(uniqueHashesCracked) / uniqueHashesProcessed * 100)
-                                             )
+          (uniqueHashesCracked,
+           uniqueHashesProcessed,
+           round(float(uniqueHashesCracked) / uniqueHashesProcessed * 100)
+          )
     print "%d/%d (%d%%) username/password combinations cracked (includes duplicate passwords across multiple users)" % \
-                                            (usernameHashCombosCracked,
-                                             usernameHashCombosProcessed,
-                                             round(float(usernameHashCombosCracked) / usernameHashCombosProcessed * 100)
-                                            )
+          (usernameHashCombosCracked,
+           usernameHashCombosProcessed,
+           round(float(usernameHashCombosCracked) / usernameHashCombosProcessed * 100)
+          )
     if ignoreHistory0:
         print "\n%d 'history0' hashes ignored\n\n" % history0hashes
 
     return
 
-# Define global variables defaults
-matchPasswordsToUsers = False # Change to True to output a list of usernames matched with passwords
-showPopularPasswords = True # Change to True to output a list of most popular passwords
-popularPasswordCount = 100 # Number of popular passwords to show
-ignoreHistory0 = True # Ignore history0 entry because history0 is current password
-showCombinedStats = True # Show stats for both modern and history passwords at the same time
-showModernStats = True # Show a separate stats blocks for history passwords and non-history passwords
-showHistoryStats = True # Show a separate stats block for history passwords
-hashcatOutputArgument = sys.argv[1]
-ntdsDumpArgument = sys.argv[2]
 
+def helpmsg():
+    print "Usage: cracked_hash_stats.py [Options] {<hashcat file> <ntds file>}\n" \
+          " Note:  If no options are specified [-p -c 100 -M -H] will be used"\
+          "  -h or --help:  This help screen\n" \
+          "  -p or --popular: Prints a list of most popular passwords.\n" \
+          "                   Defaults to top 100.  Use -c to change count.\n" \
+          "  -c or --popcount: Changes the default number of popular passwords\n" \
+          "                    output when using the -p option\n" \
+          "  -M or --modern: Prints the statistics for current passwords. \n" \
+          "  -H or --history: Prints the statistics for history passwords\n" \
+          "  -C or --combined: Shows statistics for both current and historical passwords\n"
+    return
+
+# Set defaults if command arguments are not used
+matchPasswordsToUsers = False  # Change to True to output a list of usernames matched with passwords
+showPopularPasswords = False  # Change to True to output a list of most popular passwords
+popularPasswordCount = 100  # Number of popular passwords to show
+ignoreHistory0 = True  # Ignore history0 entry because history0 is current password
+showCombinedStats = False  # Show stats for both modern and history passwords at the same time
+showModernStats = False  # Show a separate stats blocks for history passwords and non-history passwords
+showHistoryStats = False  # Show a separate stats block for history passwords
+
+
+if sys.argv.__len__() < 4:# if no options are specified use default options
+    showModernStats = True  # Show a separate stats blocks for history passwords and non-history passwords
+    showHistoryStats = True  # Show a separate stats block for history passwords
+
+try:
+    opts, args = getopt.getopt(sys.argv[1:], "hm:pc:CMH",
+                               ["help", "popular", "popcount=", "combined", "modern", "history"])
+except getopt.GetoptError as err:
+    helpmsg()
+    print str(err)
+    sys.exit(2)
+for opt, arg in opts:
+    if opt in ("-h", "--help"):
+        helpmsg()
+        sys.exit()
+    elif opt in ("-p", "--popular"):
+        showPopularPasswords = True
+    elif opt in ("-c", "--popcount"):
+        popularPasswordCount = int(arg)
+    elif opt in ("-C", "--combined"):
+        showCombinedStats = True
+    elif opt in ("-M", "--modern"):
+        showModernStats = True
+    elif opt in ("-H", "--history"):
+        showHistoryStats = True
+try:
+    hashcatOutputArgument = args[0]
+    ntdsDumpArgument = args[1]
+except IndexError:
+    helpmsg()
+    sys.exit(2)
 # Initialize global variables defaults
 ntdsDumpCombined = []
 ntdsDumpModern = []
@@ -112,7 +155,7 @@ with open(ntdsDumpArgument, 'r') as ntdsDumpFile:
                     ntdsDumpHistory.append(line.rstrip())
 
 # # File to output matched user names and passwords
-# if matchPasswordsToUsers:
+#if matchPasswordsToUsers:
 #     matchedfile = file("matched.txt", "w")
 
 # Prepare contents of the hashcat output file for multiple uses
@@ -121,19 +164,13 @@ with open(hashcatOutputArgument, 'r') as hashcatOutputFile:
 
 # Where the real work begins
 if showCombinedStats:
-    print "********************************" \
-          "    Combined Password Stats     " \
-          "********************************"
+    print "********************************    Combined Password Stats     ********************************"
     runstats(hashcatOutput, ntdsDumpCombined)
 
 if showModernStats:
-    print"********************************" \
-         "     Modern Password Stats      " \
-         "********************************"
+    print "********************************     Modern Password Stats      ********************************"
     runstats(hashcatOutput, ntdsDumpModern)
 
 if showHistoryStats:
-    print"********************************" \
-         "     History Password Stats      " \
-         "********************************"
+    print"********************************     History Password Stats      ********************************"
     runstats(hashcatOutput, ntdsDumpHistory)
