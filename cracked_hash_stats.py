@@ -10,8 +10,6 @@ Usage: cracked-hash-stats.py [hashcat cracked passwords file] [full hash list pa
 import sys
 import credsfinder
 import getopt
-import operator
-
 
 def runstats(hashcatOutput, ntdsDump):
     allHashSet = set()
@@ -81,6 +79,7 @@ def runstats(hashcatOutput, ntdsDump):
 
 def helpmsg():
     print "Usage: cracked_hash_stats.py [Options] {<hashcat file> <ntds file>}\n" \
+          " Note:  If no options are specified [-p -c 100 -M -H] will be used"\
           "  -h or --help:  This help screen\n" \
           "  -p or --popular: Prints a list of most popular passwords.\n" \
           "                   Defaults to top 100.  Use -c to change count.\n" \
@@ -97,14 +96,17 @@ showPopularPasswords = False  # Change to True to output a list of most popular 
 popularPasswordCount = 100  # Number of popular passwords to show
 ignoreHistory0 = True  # Ignore history0 entry because history0 is current password
 showCombinedStats = False  # Show stats for both modern and history passwords at the same time
-showModernStats = True  # Show a separate stats blocks for history passwords and non-history passwords
-showHistoryStats = True  # Show a separate stats block for history passwords
-matchedfile = ""
-#System arguments for input and output files
+showModernStats = False  # Show a separate stats blocks for history passwords and non-history passwords
+showHistoryStats = False  # Show a separate stats block for history passwords
+
+
+if sys.argv.__len__() < 4:# if no options are specified use default options
+    showModernStats = True  # Show a separate stats blocks for history passwords and non-history passwords
+    showHistoryStats = True  # Show a separate stats block for history passwords
+
 try:
     opts, args = getopt.getopt(sys.argv[1:], "hm:pc:CMH",
-                               ["help", "hashcat=", "ntds=", "match=", "popular", "popcount=", "combined",
-                                "modern", "history"])
+                               ["help", "popular", "popcount=", "combined", "modern", "history"])
 except getopt.GetoptError as err:
     helpmsg()
     print str(err)
@@ -114,15 +116,15 @@ for opt, arg in opts:
         helpmsg()
         sys.exit()
     elif opt in ("-p", "--popular"):
-        showPopularPasswords = operator.not_(showPopularPasswords)
+        showPopularPasswords = True
     elif opt in ("-c", "--popcount"):
         popularPasswordCount = int(arg)
     elif opt in ("-C", "--combined"):
-        showCombinedStats = operator.not_(showCombinedStats)
+        showCombinedStats = True
     elif opt in ("-M", "--modern"):
-        showModernStats = operator.not_(showModernStats)
+        showModernStats = True
     elif opt in ("-H", "--history"):
-        showHistoryStats = operator.not_(showHistoryStats)
+        showHistoryStats = True
 try:
     hashcatOutputArgument = args[0]
     ntdsDumpArgument = args[1]
