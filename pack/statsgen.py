@@ -11,7 +11,6 @@
 # Please see the attached LICENSE file for additional licensing information.
 
 import operator, string
-from optparse import OptionParser, OptionGroup
 
 VERSION = "0.0.3"
 
@@ -122,7 +121,7 @@ class StatsGen:
         for password in passwords:
             password = password.rstrip()
 
-            if len(password) == 0: continue
+            if len(password) == 0:continue
 
             self.total_counter += 1  
 
@@ -203,41 +202,4 @@ class StatsGen:
             if self.output_file:
                 self.output_file.write("%s,%d\n" % (advancedmask,count))
 
-if __name__ == "__main__":
 
-    parser = OptionParser("%prog [options] passwords.txt\n\nType --help for more options", version="%prog "+VERSION)
-
-    filters = OptionGroup(parser, "Password Filters")
-    filters.add_option("--minlength", dest="minlength", type="int", metavar="8", help="Minimum password length")
-    filters.add_option("--maxlength", dest="maxlength", type="int", metavar="8", help="Maximum password length")
-    filters.add_option("--charset", dest="charsets", help="Password charset filter (comma separated)", metavar="loweralpha,numeric")
-    filters.add_option("--simplemask", dest="simplemasks",help="Password mask filter (comma separated)", metavar="stringdigit,allspecial")
-    parser.add_option_group(filters)
-
-    parser.add_option("-o", "--output", dest="output_file",help="Save masks and stats to a file", metavar="password.masks")
-    parser.add_option("--hiderare", action="store_true", dest="hiderare", default=False, help="Hide statistics covering less than 1% of the sample")
-
-    parser.add_option("-q", "--quiet", action="store_true", dest="quiet", default=False, help="Don't show headers.")
-    (options, args) = parser.parse_args()
-
-    if len(args) != 1:
-        parser.error("no passwords file specified")
-        exit(1)
-
-    print "[*] Analyzing passwords in [%s]" % args[0]
-
-    statsgen = StatsGen()
-
-    if not options.minlength   == None: statsgen.minlength   = options.minlength
-    if not options.maxlength   == None: statsgen.maxlength   = options.maxlength
-    if not options.charsets    == None: statsgen.charsets    = [x.strip() for x in options.charsets.split(',')]
-    if not options.simplemasks == None: statsgen.simplemasks = [x.strip() for x in options.simplemasks.split(',')]
-
-    if options.hiderare: statsgen.hiderare = options.hiderare
-
-    if options.output_file:
-        print "[*] Saving advanced masks and occurrences to [%s]" % options.output_file
-        statsgen.output_file = open(options.output_file, 'w')
-
-    statsgen.generate_stats(args[0])
-    statsgen.print_stats()

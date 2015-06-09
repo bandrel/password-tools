@@ -10,6 +10,7 @@ Usage: cracked-hash-stats.py [hashcat cracked passwords file] [full hash list pa
 import sys
 import credsfinder
 import getopt
+import pack.statsgen
 
 def runstats(hashcatOutput, ntdsDump):
     allHashSet = set()
@@ -22,7 +23,7 @@ def runstats(hashcatOutput, ntdsDump):
     uniqueHashesProcessed = len(allHashSet)
 
     # Make a dictionary of all users with cracked passwords. Username is the key. Value returned is [plaintextPW,hash]
-    crackedCreds,uncracked = credsfinder.gen_dict_user_pass_hash(ntdsDump, hashcatOutput)
+    crackedCreds, uncracked, crackedPWs = credsfinder.gen_dict_user_pass_hash(ntdsDump, hashcatOutput)
 
     # Determine the number of unique hashes cracked by placing all hashes from the cracked Creds dictionary in to a set.
     for userCreds in crackedCreds.values():
@@ -75,7 +76,13 @@ def runstats(hashcatOutput, ntdsDump):
             loop += 1
         print ''
         print '*********************************************************************************************************'
-        print''
+        print ''
+        print 'PACK stats:\n\n'
+
+        if showPackStats:
+            statsgen = pack.statsgen.StatsGen()
+            statsgen.generate_stats(crackedPWs)
+            statsgen.print_stats()
     return
 
 
@@ -95,13 +102,13 @@ def helpmsg():
 
 # Set defaults if command arguments are not used
 showPopularPasswords = False  # Show a list of most popular passwords
-popularPasswordCount = 100  # Number of popular passwords to show
+popularPasswordCount = 15  # Number of popular passwords to show
 ignoreHistory0 = True  # Ignore history0 entries because history0 is current password
 showCombinedStats = False  # Show stats for both modern and history passwords at the same time
 showModernStats = False  # Show a separate stats blocks for history passwords and non-history passwords
 showHistoryStats = False  # Show a separate stats block for history passwords
-showUncracked = False   # Show a separate stats block for usernames with uncracked passwords
-
+showUncracked = False  # Show a separate stats block for usernames with uncracked passwords
+showPackStats = True  # Show stats from PACK statsgen.py
 
 if len(sys.argv) < 4:# if no options are specified use default options
     showModernStats = True  # Show a separate stats blocks for history passwords and non-history passwords
