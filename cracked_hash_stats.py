@@ -65,11 +65,13 @@ def runstats(hashcatOutput, ntdsDump):
         # Print the top popular passwords
         loop = 0
         print 'Top %d popular passwords:' % popularPasswordCount
+        print '\n                 Password | Usage Count'
+        print '                ------------------------'
         # Process and sort the passwords in popularPasswords dictionary
         topPasswordKeys = sorted(popularPasswordsDict.keys(), key=popularPasswordsDict.get, reverse=True)
         while loop < popularPasswordCount:
             try:
-                print topPasswordKeys[loop].rstrip() + "\t\t\t\t" + str(popularPasswordsDict[topPasswordKeys[loop]])
+                print "%26s: %d" % (topPasswordKeys[loop].rstrip(), popularPasswordsDict[topPasswordKeys[loop]])
             except IndexError:
                 print "\nInfo: Not enough unique cracked passwords available to fully fill the popular passwords list\n\n"
                 break

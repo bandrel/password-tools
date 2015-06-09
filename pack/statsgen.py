@@ -172,27 +172,29 @@ class StatsGen:
         """ Print password statistics. """
 
         print "\nLength Stats:"
+        print '\n          Password Length | Percentage'
+        print '         ------------------------------'
         for (length,count) in sorted(self.stats_length.iteritems(), key=operator.itemgetter(1), reverse=True):
             if self.hiderare and not count*100/self.filter_counter > 0: continue
             print "%26d: %02d%% (%d)" % (length, count*100/self.filter_counter, count)
 
-        print "\nCharacter-set Stats:"
+        print "\nCharacter-set Stats:\n"
         for (char,count) in sorted(self.stats_charactersets.iteritems(), key=operator.itemgetter(1), reverse=True):
             if self.hiderare and not count*100/self.filter_counter > 0: continue
             print "%26s: %02d%% (%d)" % (char, count*100/self.filter_counter, count)
 
-        print "\nPassword complexity:"
+        print "\nPassword complexity:\n"
         print "                     digit: min(%s) max(%s)" % (self.mindigit, self.maxdigit)
         print "                     lower: min(%s) max(%s)" % (self.minlower, self.maxlower)
         print "                     upper: min(%s) max(%s)" % (self.minupper, self.maxupper)
         print "                   special: min(%s) max(%s)" % (self.minspecial, self.maxspecial)
 
-        print "\nCommon Masks:"
+        print "\nCommon Masks:\n"
         for (simplemask,count) in sorted(self.stats_simplemasks.iteritems(), key=operator.itemgetter(1), reverse=True):
             if self.hiderare and not count*100/self.filter_counter > 0: continue
             print "%26s: %02d%% (%d)" % (simplemask, count*100/self.filter_counter, count)
 
-        print "\nAdvanced Masks:"
+        print "\nAdvanced Masks:\n"
         for (advancedmask,count) in sorted(self.stats_advancedmasks.iteritems(), key=operator.itemgetter(1), reverse=True):
             if count*100/self.filter_counter > 0:
                 print "%26s: %02d%% (%d)" % (advancedmask, count*100/self.filter_counter, count)
