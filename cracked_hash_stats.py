@@ -77,11 +77,11 @@ def runstats(hashcatOutput, ntdsDump):
                 break
             loop += 1
 
-        #run the PACK-0.0.4 statsgen to give stats about password length/complexity/character sets/etc
-        statsgen = pack.statsgen.StatsGen()
-        statsgen.generate_stats(crackedPWs)
-        statsgen.print_stats()
-        print '\n\n************************************************************************************************\n\n'
+    #run the PACK-0.0.4 statsgen to give stats about password length/complexity/character sets/etc
+    statsgen = pack.statsgen.StatsGen()
+    statsgen.generate_stats(crackedPWs)
+    statsgen.print_stats()
+    print '\n\n************************************************************************************************\n\n'
 
     return
 
@@ -101,7 +101,7 @@ def helpmsg():
     return
 
 # Set defaults if command arguments are not used
-showPopularPasswords = False  # Show a list of most popular passwords
+showPopularPasswords = True  # Show a list of most popular passwords
 popularPasswordCount = 15  # Number of popular passwords to show
 ignoreHistory0 = True  # Ignore history0 entries because history0 is current password
 showCombinedStats = False  # Show stats for both modern and history passwords at the same time
