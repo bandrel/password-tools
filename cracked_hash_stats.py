@@ -16,19 +16,21 @@ def runstats(hashcatOutput, ntdsDump):
     allHashSet = set()
     crackedHashSet = set()
     popularPasswordsDict = {}
-    global uncracked
+    uncracked = []
+    crackedPWs = []
     # Determine the number of unique hashes processed by placing all ntds dump lines in a set
     for dumpline in ntdsDump:
         allHashSet.add(dumpline.split(":")[1].upper())
     uniqueHashesProcessed = len(allHashSet)
 
     # Make a dictionary of all users with cracked passwords. Username is the key. Value returned is [plaintextPW,hash]
-    crackedCreds, uncracked, crackedPWs = credsfinder.gen_dict_user_pass_hash(ntdsDump, hashcatOutput)
+    crackedCreds, uncracked = credsfinder.gen_dict_user_pass_hash(ntdsDump, hashcatOutput)
 
     # Determine the number of unique hashes cracked by placing all hashes from the cracked Creds dictionary in to a set.
     for userCreds in crackedCreds.values():
         crackedHashSet.add(userCreds[1])
         # Make a dictionary showing how many times each cracked password has been used
+        crackedPWs.append(userCreds[0])
         if showPopularPasswords:
             clearTextPW = userCreds[0]
             if popularPasswordsDict.has_key(userCreds[0]):
@@ -65,24 +67,29 @@ def runstats(hashcatOutput, ntdsDump):
         # Print the top popular passwords
         loop = 0
         print 'Top %d popular passwords:' % popularPasswordCount
-        print '\n                 Password | Usage Count'
-        print '                ------------------------'
+        print '\n                     Password | Usage Count'
+        print '                    ------------------------'
         # Process and sort the passwords in popularPasswords dictionary
         topPasswordKeys = sorted(popularPasswordsDict.keys(), key=popularPasswordsDict.get, reverse=True)
         while loop < popularPasswordCount:
             try:
-                print "%26s: %d" % (topPasswordKeys[loop].rstrip(), popularPasswordsDict[topPasswordKeys[loop]])
+                print "%30s: %d" % (topPasswordKeys[loop].rstrip(), popularPasswordsDict[topPasswordKeys[loop]])
             except IndexError:
                 print "\nInfo: Not enough unique cracked passwords available to fully fill the popular passwords list\n\n"
                 break
             loop += 1
 
+
     #run the PACK-0.0.4 statsgen to give stats about password length/complexity/character sets/etc
     statsgen = pack.statsgen.StatsGen()
     statsgen.generate_stats(crackedPWs)
     statsgen.print_stats()
+    print "\nTotal number of user/password combinations not cracked: %d" % len(uncracked)
+    print ''
+    if showUncracked:
+        for user in uncracked:
+            print user
     print '\n\n************************************************************************************************\n\n'
-
     return
 
 
@@ -147,7 +154,6 @@ ntdsDumpCombined = []
 ntdsDumpModern = []
 ntdsDumpHistory = []
 history0hashes = 0
-uncracked = []
 
 
 # create processed ntds dumps based on the options specified above. These will be input in to runstats()
@@ -182,10 +188,3 @@ if showModernStats:
 if showHistoryStats:
     print "********************************     History Password Stats      ****************************************"
     runstats(hashcatOutput, ntdsDumpHistory)
-
-if showUncracked:
-    print "********************************     Passwords not cracked Stats ****************************************"
-    print ""
-    print "Total number of user/password combinations not cracked: %d" % len(uncracked)
-    for user in uncracked:
-        print user
