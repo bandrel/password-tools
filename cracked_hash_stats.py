@@ -71,18 +71,16 @@ def runstats(hashcatOutput, ntdsDump):
             try:
                 print topPasswordKeys[loop].rstrip() + "\t\t\t\t" + str(popularPasswordsDict[topPasswordKeys[loop]])
             except IndexError:
-                print "\nInfo: Not enough unique cracked passwords available to fully fill the popular passwords list"
+                print "\nInfo: Not enough unique cracked passwords available to fully fill the popular passwords list\n\n"
                 break
             loop += 1
-        print ''
-        print '*********************************************************************************************************'
-        print ''
-        print 'PACK stats:\n\n'
 
-        if showPackStats:
-            statsgen = pack.statsgen.StatsGen()
-            statsgen.generate_stats(crackedPWs)
-            statsgen.print_stats()
+        #run the PACK-0.0.4 statsgen to give stats about password length/complexity/character sets/etc
+        statsgen = pack.statsgen.StatsGen()
+        statsgen.generate_stats(crackedPWs)
+        statsgen.print_stats()
+        print '\n\n************************************************************************************************\n\n'
+
     return
 
 
@@ -108,7 +106,6 @@ showCombinedStats = False  # Show stats for both modern and history passwords at
 showModernStats = False  # Show a separate stats blocks for history passwords and non-history passwords
 showHistoryStats = False  # Show a separate stats block for history passwords
 showUncracked = False  # Show a separate stats block for usernames with uncracked passwords
-showPackStats = True  # Show stats from PACK statsgen.py
 
 if len(sys.argv) < 4:# if no options are specified use default options
     showModernStats = True  # Show a separate stats blocks for history passwords and non-history passwords
@@ -187,6 +184,6 @@ if showHistoryStats:
 if showUncracked:
     print "********************************     Passwords not cracked Stats ****************************************"
     print ""
-    print "Total number of passwords not cracked %d" % len(uncracked)
+    print "Total number of user/password combinations not cracked: %d" % len(uncracked)
     for user in uncracked:
         print user

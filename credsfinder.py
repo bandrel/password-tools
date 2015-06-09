@@ -31,7 +31,7 @@ def gen_dict_user_pass_hash(user_hash_list, hash_pass_list):
                                                     # associated with password
             userpasshash[user] = [passwordquery,hashquery]  # creates a dictionary with using the username as the key
                                                             # with the password/hash combination as the content.
-            crackedPWs.append(passwordquery)
+            crackedPWs.append(passwordquery)        # Make a list of passwords matched to a user. Includes duplicates
         except KeyError:
             # User doesn't have a cracked password
             uncracked.add(user)  # add username to uncracked userlist
