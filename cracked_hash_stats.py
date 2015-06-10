@@ -76,16 +76,15 @@ def runstats(hcoutput, ntdsdump):
         # Process and sort the passwords in popularPasswords dictionary
         toppwkeys = sorted(
             popularpwsdict.keys(), key=popularpwsdict.get, reverse=True)
-        while loop < popularPasswordCount:
+        for count in xrange(popularPasswordCount):
             try:
                 print '%30s: %d' % (
-                    toppwkeys[loop].rstrip(),
-                    popularpwsdict[toppwkeys[loop]])
+                    toppwkeys[count].rstrip(),
+                    popularpwsdict[toppwkeys[count]])
             except IndexError:
                 print '\nInfo: Not enough unique cracked passwords ' \
                       'available to fully fill the popular passwords list\n\n'
                 break
-            loop += 1
 
     # Run the PACK-0.0.4 statsgen to give stats about
     # password length/complexity/character sets/etc.
