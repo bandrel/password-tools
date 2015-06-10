@@ -29,8 +29,9 @@ def runstats(hashcatOutput, ntdsDump):
     # Determine the number of unique hashes cracked by placing all hashes from the cracked Creds dictionary in to a set.
     for userCreds in crackedCreds.values():
         crackedHashSet.add(userCreds[1])
-        # Make a dictionary showing how many times each cracked password has been used
+        # Track cracked passwords (including duplicates) for running PACK stats
         crackedPWs.append(userCreds[0])
+        # Make a dictionary showing how many times each cracked password has been used
         if showPopularPasswords:
             clearTextPW = userCreds[0]
             if popularPasswordsDict.has_key(userCreds[0]):
@@ -95,7 +96,7 @@ def runstats(hashcatOutput, ntdsDump):
 
 def helpmsg():
     print "Usage: cracked_hash_stats.py [Options] {<hashcat file> <ntds file>}\n" \
-          " Note:  If no options are specified [-p -c 100 -M -H] will be used"\
+          " Note:  If no options are specified [-p -c 15 -M -H] will be used"\
           "  -h or --help:  This help screen\n" \
           "  -p or --popular: Prints a list of most popular passwords.\n" \
           "                   Defaults to top 100.  Use -c to change count.\n" \
