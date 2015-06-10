@@ -24,7 +24,7 @@ def runstats(hashcatOutput, ntdsDump):
     uniqueHashesProcessed = len(allHashSet)
 
     # Make a dictionary of all users with cracked passwords. Username is the key. Value returned is [plaintextPW,hash]
-    crackedCreds, uncracked = credsfinder.gen_dict_user_pass_hash(ntdsDump, hashcatOutput)
+    crackedCreds, uncracked = credsfinder.gen_dict(ntdsDump, hashcatOutput)
 
     # Determine the number of unique hashes cracked by placing all hashes from the cracked Creds dictionary in to a set.
     for userCreds in crackedCreds.values():

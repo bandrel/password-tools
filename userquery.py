@@ -6,7 +6,7 @@ import re
 userlist = []
 
 history = re.compile(r"_(nt|lm)history")
-dic = credsfinder.gen_dict_user_pass_hash(sys.argv[1],sys.argv[2])
+dic = credsfinder.gen_dict(sys.argv[1],sys.argv[2])
 
 with open(sys.argv[3], mode="rb") as f:
     for line in f:
