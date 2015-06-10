@@ -196,19 +196,19 @@ with open(hashcatOutputArgument, 'r') as hashcatOutputFile:
 
 # Where the real work begins
 if showCombinedStats:
-    print '********************************\r' \
-          '    Combined Password Stats\r' \
+    print '********************************\n' \
+          '    Combined Password Stats\n' \
           '********************************'
     runstats(hashcatOutput, ntdsDumpCombined)
 
 if showModernStats:
-    print '********************************\r' \
-          '     Modern Password Stats\r' \
+    print '********************************\n' \
+          '     Modern Password Stats\n' \
           '********************************'
     runstats(hashcatOutput, ntdsDumpModern)
 
 if showHistoryStats:
-    print '********************************\r' \
-          '     History Password Stats\r' \
+    print '********************************\n' \
+          '     History Password Stats\n' \
           '********************************'
     runstats(hashcatOutput, ntdsDumpHistory)
