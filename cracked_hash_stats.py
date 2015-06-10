@@ -13,25 +13,31 @@ import credsfinder
 import getopt
 import pack.statsgen
 
-def runstats(hashcatOutput, ntdsDump):
-    allHashSet = set()
-    crackedHashSet = set()
-    popularPasswordsDict = {}
-    uncracked = []
-    crackedPWs = []
-    # Determine the number of unique hashes processed by placing all ntds dump lines in a set
-    for dumpline in ntdsDump:
-        allHashSet.add(dumpline.split(":")[1].upper())
-    uniqueHashesProcessed = len(allHashSet)
+def runstats(hcoutput, ntdsdump):
+    allhashset = set()
+    crackedhashset = set()
+    popularpwsdict = {}
+    crackedpws = []
+    # Determine the number of unique hashes processed by placing all ntds dump
+    # lines in a set.
+    for dumpline in ntdsdump:
+        allhashset.add(dumpline.split(':')[1].upper())
+    uniquepwsran = len(allhashset)
 
-    # Make a dictionary of all users with cracked passwords. Username is the key. Value returned is [plaintextPW,hash]
-    crackedCreds, uncracked = credsfinder.gen_dict(ntdsDump, hashcatOutput)
+    # Make a dictionary of all users with cracked passwords. Username is the
+    # key.  Value returned is [plaintextPW,hash].
+    crackedcreds, uncracked = credsfinder.gen_dict(
+        ntdsdump, hcoutput)
 
-    # Determine the number of unique hashes cracked by placing all hashes from the cracked Creds dictionary in to a set.
-    for userCreds in crackedCreds.values():
-        crackedHashSet.add(userCreds[1])
-        # Make a dictionary showing how many times each cracked password has been used
-        crackedPWs.append(userCreds[0])
+    # Determine the number of unique hashes cracked by placing all hashes from
+    # the cracked Creds dictionary in to a set.
+    for userCreds in crackedcreds.values():
+        crackedhashset.add(userCreds[1])
+        # Track cracked passwords (including
+        # duplicates) for running PACK stats.
+        crackedpws.append(userCreds[0])
+        # Make a dictionary showing how many times each cracked password has
+        # been used.
         if showPopularPasswords:
             cleartextpw = userCreds[0]
             if userCreds[0] in popularpwsdict:
