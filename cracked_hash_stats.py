@@ -12,11 +12,13 @@ import sys
 import credsfinder
 import getopt
 import pack.statsgen
+import collections
+
 
 def runstats(hcoutput, ntdsdump):
     allhashset = set()
     crackedhashset = set()
-    popularpwsdict = {}
+    popularpwsdict = collections.defaultdict(int)
     crackedpws = []
     # Determine the number of unique hashes processed by placing all ntds dump
     # lines in a set.
@@ -26,8 +28,7 @@ def runstats(hcoutput, ntdsdump):
 
     # Make a dictionary of all users with cracked passwords. Username is the
     # key.  Value returned is [plaintextPW,hash].
-    crackedcreds, uncracked = credsfinder.gen_dict(
-        ntdsdump, hcoutput)
+    crackedcreds, uncracked = credsfinder.gen_dict(ntdsdump, hcoutput)
 
     # Determine the number of unique hashes cracked by placing all hashes from
     # the cracked Creds dictionary in to a set.
@@ -40,10 +41,7 @@ def runstats(hcoutput, ntdsdump):
         # been used.
         if showPopularPasswords:
             cleartextpw = userCreds[0]
-            if userCreds[0] in popularpwsdict:
-                popularpwsdict[cleartextpw] += 1
-            else:
-                popularpwsdict[cleartextpw] = 1
+            popularpwsdict[cleartextpw] += 1
 
     uniquepwscracked = len(crackedhashset)
     # Determine the number of username/hash combos processed.
@@ -69,7 +67,6 @@ def runstats(hcoutput, ntdsdump):
         # popularpwsdict.
 
         # Print the top popular passwords.
-        loop = 0
         print 'Top %d popular passwords:' % popularPasswordCount
         print '\n                     Password | Usage Count'
         print '                    ------------------------'
