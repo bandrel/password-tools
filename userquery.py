@@ -5,8 +5,10 @@ import re
 
 userlist = []
 
-history = re.compile(r"_(nt|lm)history")
-dic = credsfinder.gen_dict(sys.argv[1],sys.argv[2])
+with open(sys.argv[1], mode="rb") as f1:
+    with open(sys.argv[2], mode="rb") as f2:
+        history = re.compile(r"_(nt|lm)history")
+        dic, uncracked = credsfinder.gen_dict(f1,f2)
 
 with open(sys.argv[3], mode="rb") as f:
     for line in f:
@@ -14,10 +16,6 @@ with open(sys.argv[3], mode="rb") as f:
 
 for user in userlist:
     if re.search(history,user) is not None:
-        password,phash = credsfinder.query_dic(user,dic)
+        password,phash = credsfinder.userquery(user,dic)
         print user, password, phash
 
-for user in userlist:
-    if re.search(history,user) is None:
-        password,phash = credsfinder.query_dic(user,dic)
-        print user, password, phash

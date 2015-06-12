@@ -45,9 +45,26 @@ def gen_dict(user_hash_list, hash_pass_list):
             # list and continue
             uncracked.append(user)
             pass
-    return userpasshash,uncracked
+    return userpasshash, uncracked
 
-def query_dic(userquery,dic):
-    password = dic[userquery][0]
-    phash = dic[userquery][1]
+def userquery(uquery,dic):
+    password = dic[uquery][0]
+    phash = dic[uquery][1]
     return password,phash
+
+def passquery(pquery,dic):
+    usernames = set()
+    for user in dic:
+        if dic[user][0] == pquery:
+            usernames.add(user)
+    return usernames
+
+def hashquery(hquery,dic):
+    usernames = set()
+    password = ""
+    for user in dic:
+        if dic[user][1] == hquery:
+            usernames.add(user)
+            password = dic[user][0]
+    return usernames, password
+
