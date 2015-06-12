@@ -62,8 +62,8 @@ assoicated with the password are returned but the hash is not."""
 
 def passquery(pquery,dic):
     usernames = set()
-    for user in dic:
-        if dic[user][0] == pquery:      # Check to see if the password stored in the dictionary matches the queried pass
+    for user, values in dic.iteritems():
+        if values[0] == pquery:      # Check to see if the password stored in the dictionary matches the queried pass
             usernames.add(user)         # If the password matches then add the username to the username set
     return usernames
 
@@ -75,9 +75,9 @@ item is then returned along with the password that matches the hash"""
 def hashquery(hquery,dic):
     usernames = set()
     password = ""
-    for user in dic:
-        if dic[user][1] == hquery:      # Check to see if the hash stored in the dictionary matches the queried hash
+    for user, values in dic.iteritems():
+        if values[1] == hquery:      # Check to see if the hash stored in the dictionary matches the queried hash
             usernames.add(user)         # If the password matches then add the username to the username set
-            password = dic[user][0]     # Also sets the password that is listed in the dictionary.
+            password = values[0]     # Also sets the password that is listed in the dictionary.
     return usernames, password
 
