@@ -12,8 +12,8 @@ with open(ntdsdump, mode="rb") as ntdsDumpFile:
     with open(hashcatoutput, mode="rb") as hashcatfile:
         dic, uncracked = credsfinder.gen_dict(ntdsDumpFile,hashcatfile)
 
-with open(sys.argv[3], mode="rb") as passwordquery:
-    for line in passwordquery:
+with open(passwordquery, mode="rb") as passwordqueryfile:
+    for line in passwordqueryfile:
         passlist.append(line.rstrip())
 
 for password in passlist:
