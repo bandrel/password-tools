@@ -22,7 +22,7 @@ def runstats(hcoutput, ntdsdump):
     crackedpws = []
     # Determine the number of unique hashes processed by placing all ntds dump
     # lines in a set.
-    for dumpline in f:
+    for dumpline in ntdsdump:
         allhashset.add(dumpline.split(':')[1].upper())
     uniquepwsran = len(allhashset)
 
