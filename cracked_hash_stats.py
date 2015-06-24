@@ -27,15 +27,15 @@ def runstats(hcoutput, ntdsdump):
     uniquepwsran = len(allhashset)
 
     # Make a dictionary of all users with cracked passwords. Username is the
-    # key.  Value returned is [plaintextPW,hash].
+    # key. Key values are returned as [plaintextPW,hash].
     crackedcreds, uncracked = credsfinder.gen_dict(ntdsdump, hcoutput)
 
     # Determine the number of unique hashes cracked by placing all hashes from
     # the cracked Creds dictionary in to a set.
     for userCreds in crackedcreds.values():
         crackedhashset.add(userCreds[1])
-        # Track cracked passwords (including
-        # duplicates) for running PACK stats.
+        # Track cracked passwords (including duplicates) for running PACK
+        # stats.
         crackedpws.append(userCreds[0])
         # Make a dictionary showing how many times each cracked password has
         # been used.
@@ -126,6 +126,7 @@ showModernStats = False  # Show a stats block for current passwords
 showHistoryStats = False  # Show a stats block for history passwords
 showCombinedStats = False  # Combine stats of both modern and history passwords
 showUncracked = False  # Print usernames with uncracked passwords
+ignoreBlankPWUsers = True  # Ignore users whose hash == blank password
 
 if len(sys.argv) < 4:  # If no options are specified, use default options
     showModernStats = True
@@ -166,15 +167,19 @@ ntdsDumpCombined = []
 ntdsDumpModern = []
 ntdsDumpHistory = []
 history0hashes = 0
+blankPWUsers = 0
 
-
-# create processed ntds dumps based on the options specified above. These
-# will be input in to runstats()
+# Create processed ntds dumps based on the options specified above. These
+# will be input in to runstats() .
 with open(ntdsDumpArgument, 'r') as ntdsDumpFile:
     for line in ntdsDumpFile.readlines():
         if ignoreHistory0 and line.find('_nthistory0') > -1:
             history0hashes += 1
         else:
+            if ignoreBlankPWUsers:
+                if line.find('31D6CFE0D16AE931B73C59D7E0C089C0') > -1:
+                    blankPWUsers += 1
+                    continue
             if showCombinedStats:
                 ntdsDumpCombined.append(line.rstrip())
             if showModernStats:
