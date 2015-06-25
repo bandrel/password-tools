@@ -15,6 +15,7 @@ def gen_dict(user_hash_list, hash_pass_list):
     for item in user_hash_list:
         # Splits the username and password hash into two variables
         username, phash = item.rstrip().split(":")
+        phash = phash.lower()
         # Stores the password hash into the userhash dict
         userhash[username] = phash
     for item in hash_pass_list:
@@ -32,9 +33,9 @@ def gen_dict(user_hash_list, hash_pass_list):
         # Check to see if there is a cracked password for the user.  If
         # password is not found then KeyError will occur
         try:
-            #defines hash lookup per user
+            # Defines hash lookup per user.
             hashquery = userhash[user]
-            #defines password lookup per hash.
+            # Defines password lookup per hash.
             passwordquery = hashpass[hashquery]
 
             # Creates a dictionary with using the username as the key with
