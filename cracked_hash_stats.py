@@ -131,9 +131,9 @@ showUncracked = False  # Print usernames with uncracked passwords
 ignoreBlankPWUsers = True  # Ignore users whose hash == blank password
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], 'hm:pc:CMHu',
+    opts, args = getopt.getopt(sys.argv[1:], 'hm:pc:CMHub',
                                ['help', 'popular', 'popcount=', 'combined',
-                                'modern', 'history', 'uncracked='])
+                                'modern', 'history', 'uncracked=', 'blank'])
 except getopt.GetoptError as err:
     helpmsg()
     print str(err)
@@ -154,7 +154,7 @@ for opt, arg in opts:
         showHistoryStats = True
     elif opt in ('-u', '--uncracked'):
         showUncracked = True
-    elif opt in ('b', '--blank'):
+    elif opt in ('-b', '--blank'):
         ignoreBlankPWUsers = False
 try:
     hashcatOutputArgument = args[0]
