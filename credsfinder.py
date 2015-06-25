@@ -15,8 +15,9 @@ def gen_dict(user_hash_list, hash_pass_list):
     for item in user_hash_list:
         # Splits the username and password hash into two variables
         username, phash = item.rstrip().split(":")
+        phash = phash.lower()
         # Stores the password hash into the userhash dict
-        userhash[username] = phash.lower()
+        userhash[username] = phash
     for item in hash_pass_list:
         # Splits the username and password hash into two variables using a
         # colon as the delimiter.  In the event that there is a a colon in
@@ -24,7 +25,7 @@ def gen_dict(user_hash_list, hash_pass_list):
         # colon.
         phash, password = item.rstrip().split(":",1)
         # Stores the plaintext password into the hashpass dict
-        hashpass[phash.lower()] = password
+        hashpass[phash] = password
 
     # Combine the userhash and userpass dictionaries in to a single
     # userpasshash dictionary.
