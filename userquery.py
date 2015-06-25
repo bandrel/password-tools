@@ -6,7 +6,7 @@ import re
 you would like to find what their passwords are. The user list is line separated and case sensitive.  The output
 generated is the username password and hash of each of the users"""
 userlist = []
-__file__ , ntdsdump, hashcatoutput, userquery = sys.argv
+__file__ , hashcatoutput, ntdsdump, userquery = sys.argv
 
 with open(ntdsdump, mode="rb") as ntdsDumpFile:
     with open(hashcatoutput, mode="rb") as hashcatfile:
