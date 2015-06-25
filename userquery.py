@@ -18,7 +18,7 @@ with open(userquery, mode="rb") as userqueryfile:
         userlist.append(line.rstrip())
 
 for user in userlist:
-    if re.search(history,user) is not None:
+    if re.search(history,user) is None:
         password,phash = credsfinder.userquery(user,dic)
         print user, password, phash
 
