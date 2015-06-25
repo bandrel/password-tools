@@ -23,7 +23,7 @@ def runstats(hcoutput, ntdsdump):
     # Determine the number of unique hashes processed by placing all ntds dump
     # lines in a set.
     for dumpline in ntdsdump:
-        allhashset.add(dumpline.split(':')[1].upper())
+        allhashset.add(dumpline.split(':')[1].lower())
     uniquepwsran = len(allhashset)
 
     # Make a dictionary of all users with cracked passwords. Username is the
@@ -48,14 +48,19 @@ def runstats(hcoutput, ntdsdump):
     userpwcombossran = len(ntdsdump)
     # Determine the number of username/hash combos cracked.
     userpwcomboscracked = len(crackedcreds)
-
+    try:
+        uniquepercentcracked = round(float(uniquepwscracked) / uniquepwsran * 100)
+    except ZeroDivisionError:
+        uniquepercentcracked = 0
     print '%d/%d (%d%%) unique passwords cracked' % (
-        uniquepwscracked, uniquepwsran,
-        round(float(uniquepwscracked) / uniquepwsran * 100))
+        uniquepwscracked, uniquepwsran, uniquepercentcracked)
+    try:
+        percentcracked = round(float(userpwcomboscracked) / userpwcombossran * 100)
+    except ZeroDivisionError:
+        percentcracked = 0
     print '%d/%d (%d%%) username/password combinations cracked ' \
           '(includes duplicate passwords across multiple users)\n' % (
-              userpwcomboscracked, userpwcombossran,
-              round(float(userpwcomboscracked) / userpwcombossran * 100))
+              userpwcomboscracked, userpwcombossran, percentcracked)
 
     if ignoreHistory0:
         print '%d "history0" hashes ignored\n' % history0hashes
