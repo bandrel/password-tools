@@ -177,7 +177,7 @@ with open(ntdsDumpArgument, 'r') as ntdsDumpFile:
             history0hashes += 1
         else:
             if ignoreBlankPWUsers:
-                if line.find('31D6CFE0D16AE931B73C59D7E0C089C0') > -1:
+                if line.find('31d6cfe0d16ae931b73c59d7e0c089c0') > -1:
                     blankPWUsers += 1
                     continue
             if showCombinedStats:
