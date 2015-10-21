@@ -13,7 +13,10 @@ with open(inputfile) as input:
         if re.search(r'^SAM.Account.type',line) is None:
             sline = line.strip(':::\n')
             username, userid, lmhash, ntlmhash = sline.split(':')
-            username_and_lmhash.append(str(username + ':' + lmhash))
+            leftlm = lmhash[:16]
+            rightlm = lmhash[16:]
+            username_and_lmhash.append(str(username + ':' + leftlm))
+            username_and_lmhash.append(str(username + ':' + rightlm))
             username_and_ntlmhash.append(str(username + ':' + ntlmhash))
 
 with open(lmoutput,mode='w') as file:
