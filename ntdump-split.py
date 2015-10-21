@@ -10,7 +10,7 @@ ntlmoutput = str(sys.argv[1]+'.ntlm')
 
 with open(inputfile) as input:
     for line in input:
-        if re.search(r'^SAM',line) is None:
+        if re.search(r'^SAM.Account.type',line) is None:
             sline = line.strip(':::\n')
             username, userid, lmhash, ntlmhash = sline.split(':')
             username_and_lmhash.append(str(username + ':' + lmhash))
