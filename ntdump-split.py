@@ -1,5 +1,6 @@
 __author__ = 'jbollin'
 import sys
+import re
 
 username_and_lmhash = []
 username_and_ntlmhash = []
@@ -9,10 +10,11 @@ ntlmoutput = str(sys.argv[1]+'.ntlm')
 
 with open(inputfile) as input:
     for line in input:
-        sline = line.strip(':::\n')
-        username, userid, lmhash, ntlmhash = sline.split(':')
-        username_and_lmhash.append(str(username + ':' + lmhash))
-        username_and_ntlmhash.append(str(username + ':' + ntlmhash))
+        if re.search(r'^SAM',line) is None:
+            sline = line.strip(':::\n')
+            username, userid, lmhash, ntlmhash = sline.split(':')
+            username_and_lmhash.append(str(username + ':' + lmhash))
+            username_and_ntlmhash.append(str(username + ':' + ntlmhash))
 
 with open(lmoutput,mode='w') as file:
     for line in username_and_lmhash:
