@@ -12,7 +12,7 @@ with open(sys.argv[1],'w') as b:
                 everything.add(line)
 
     for line in everything:
-        b.write(line+'\n')
+        b.write(line)
 
 
 
