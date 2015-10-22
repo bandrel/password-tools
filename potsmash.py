@@ -9,7 +9,9 @@ with open(sys.argv[1],'w') as b:
     for pot in pots:
         with open(pot) as file:
             for line in file:
-                everything.add(line)
+                a = line.split(':')
+                if len(a[0]) > 16:
+                    everything.add(line)
 
     for line in everything:
         b.write(line)
