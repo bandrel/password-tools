@@ -1,4 +1,4 @@
-# !/usr/bin/python
+#!/usr/bin/python
 __author__ = 'rleese'
 '''Processes a cracked password list from hashcat, compares it to the
 full original hash dump and spits out statstics about the cracked
