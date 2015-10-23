@@ -73,7 +73,8 @@ except:
     print '[!] There are no files with the extension %s in %a' % extension, working_dir
     sys.exit(2)
 
-for file in filetype:
-    split_to_size(file)
-dedupe_and_merge(outputfile)
-cleanup_temp()
+if __name__ == '__main__':
+    for file in filetype:
+        split_to_size(file)
+    dedupe_and_merge(outputfile)
+    cleanup_temp()
