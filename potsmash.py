@@ -1,7 +1,7 @@
+#!/usr/bin/env python
 __author__ = 'jbollin'
 import sys
 import glob
-
 
 pots = glob.glob('*.pot')
 everything = set()
