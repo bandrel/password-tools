@@ -41,6 +41,9 @@ def helpmsg():
           '  -o or --output: Specifies the output file name of the new dictionary\n'
 
 if __name__ == '__main__':
+    #Program defaults
+    directory = os.curdir
+    extension = 'dic'
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'hd:e:o:',['help', 'directory=', 'extension=', 'output='])
     except getopt.GetoptError as err:
@@ -71,9 +74,7 @@ if __name__ == '__main__':
         sys.exit(2)
 
 
-    #Program defaults
-    directory = os.curdir
-    extension = 'dic'
+
     for file in filetype:
         split_to_size(file)
     dedupe_and_merge(outputfile)
