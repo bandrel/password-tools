@@ -41,34 +41,34 @@ def helpmsg():
           '  -o or --output: Specifies the output file name of the new dictionary\n'
 
 if __name__ == '__main__':
-try:
-    opts, args = getopt.getopt(sys.argv[1:], 'hd:e:o:',['help', 'directory=', 'extension=', 'output='])
-except getopt.GetoptError as err:
-    helpmsg()
-    print str(err)
-    sys.exit(2)
-
-for opt, arg in opts:
-    if opt in ('-h', '--help'):
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], 'hd:e:o:',['help', 'directory=', 'extension=', 'output='])
+    except getopt.GetoptError as err:
         helpmsg()
-        sys.exit()
-    elif opt in ('-d', '--directory'):
-        working_dir = arg
-    elif opt in ('-e', '--extension'):
-        extension = arg
-    elif opt in ('-o', '--output'):
-        outputfile = arg
+        print str(err)
+        sys.exit(2)
 
-try:
-    os.chdir(working_dir)
-except:
-    print '%s is not a valid directory' % working_dir
-    sys.exit(2)
-try:
-    filetype = glob.glob(str('*.'+extension))
-except:
-    print '[!] There are no files with the extension %s in %a' % extension, working_dir
-    sys.exit(2)
+    for opt, arg in opts:
+        if opt in ('-h', '--help'):
+            helpmsg()
+            sys.exit()
+        elif opt in ('-d', '--directory'):
+            working_dir = arg
+        elif opt in ('-e', '--extension'):
+            extension = arg
+        elif opt in ('-o', '--output'):
+            outputfile = arg
+
+    try:
+        os.chdir(working_dir)
+    except:
+        print '%s is not a valid directory' % working_dir
+        sys.exit(2)
+    try:
+        filetype = glob.glob(str('*.'+extension))
+    except:
+        print '[!] There are no files with the extension %s in %a' % extension, working_dir
+        sys.exit(2)
 
 
     #Program defaults
