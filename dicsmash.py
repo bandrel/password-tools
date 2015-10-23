@@ -5,10 +5,6 @@ import glob
 import os
 import getopt
 
-#Program defaults
-directory = os.curdir
-extension = 'dic'
-
 
 def split_to_size(file):    #read file line by line and copy the password into a file that corresponds to the length
     with open(file) as origionaldic:
@@ -44,6 +40,7 @@ def helpmsg():
           '  -e or --extension: specifies the extension of the input dictionaries\n' \
           '  -o or --output: Specifies the output file name of the new dictionary\n'
 
+if __name__ == '__main__':
 try:
     opts, args = getopt.getopt(sys.argv[1:], 'hd:e:o:',['help', 'directory=', 'extension=', 'output='])
 except getopt.GetoptError as err:
@@ -73,7 +70,10 @@ except:
     print '[!] There are no files with the extension %s in %a' % extension, working_dir
     sys.exit(2)
 
-if __name__ == '__main__':
+
+    #Program defaults
+    directory = os.curdir
+    extension = 'dic'
     for file in filetype:
         split_to_size(file)
     dedupe_and_merge(outputfile)
