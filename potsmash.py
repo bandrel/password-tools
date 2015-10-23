@@ -3,10 +3,13 @@ __author__ = 'jbollin'
 import sys
 import glob
 import getopt
+import os
 
-def smash_pots(pots,mode,outputfile):
+def smash_pots(directory,mode,outputfile):
     everything = set()
     with open(outputfile,'w') as b:
+        os.chdir(directory)
+        pots = glob.glob('*.pot')
         for pot in pots:
             with open(pot) as file:
                 for line in file:
@@ -32,8 +35,8 @@ def helpmsg():
 
 if __name__ == '__main__':
     mode = 'ALL'
-    pots = glob.glob('*.pot')
     outputfile = ''
+    directory = os.curdir
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'hd:lno:',['help', 'directory=', 'lm', 'ntlm', 'output='])
     except getopt.GetoptError as err:
@@ -46,7 +49,7 @@ if __name__ == '__main__':
             helpmsg()
             sys.exit()
         elif opt in ('-d', '--directory'):
-            working_dir = arg
+            directory = arg
         elif opt in ('-l', '--lm'):
             mode = 'LM'
         elif opt in ('-n', '--ntlm'):
@@ -56,7 +59,7 @@ if __name__ == '__main__':
     if outputfile == '':
         print '[!] you must specify an output file name'
         sys.exit(2)
-    smash_pots(pots,mode,outputfile)
+    smash_pots(directory,mode,outputfile)
 
 
 
