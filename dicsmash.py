@@ -4,7 +4,6 @@ import sys
 import glob
 import os
 import getopt
-import gc
 
 
 def split_to_size(file):    #read file line by line and copy the password into a file that corresponds to the length
@@ -17,6 +16,7 @@ def split_to_size(file):    #read file line by line and copy the password into a
 
 def dedupe_and_merge(outname):  #reads each tempfile in and then adds the contents to a set.
     #Then the system outputs the set to a file and combines all of the sets to one file.
+    import gc
     global tempfiles
 
     tempfiles = glob.glob('*.dictemp')
