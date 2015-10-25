@@ -7,6 +7,7 @@ import getopt
 
 
 def split_to_size(file):    #read file line by line and copy the password into a file that corresponds to the length
+    print '[+] Splitting %s' % file
     with open(file) as origionaldic:
         for line in origionaldic:
             current_length = len(line.rstrip())
@@ -22,6 +23,7 @@ def dedupe_and_merge(outname):  #reads each tempfile in and then adds the conten
     tempfiles = glob.glob('*.dictemp')
     with open(outname,'w') as outfile:
         for file in tempfiles:
+            print '[+] Processing %s' % file
             working_set = set()
             with open(file) as current_working_file:
                 for line in current_working_file:
@@ -31,6 +33,7 @@ def dedupe_and_merge(outname):  #reads each tempfile in and then adds the conten
             gc.collect()
 
 def cleanup_temp():         #delets the dictemp files
+   print '[+] Cleaning up tempfiles' % file
    for tfile in tempfiles:
         os.remove(tfile)
 
