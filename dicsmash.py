@@ -52,6 +52,8 @@ def helpmsg():
           '  -o or --output: Specifies the output file name of the new dictionary\n' \
           '  -v or --verbose: Creates verbose output\n'
 def print_elapsed():
+    global elapsed_time
+    elapsed_time = datetime.datetime.now() - start_time
     if verbose_mode == True:
         print '[+] %s since start' % elapsed_time
 tempfiles = []
