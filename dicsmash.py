@@ -21,6 +21,7 @@ def dedupe_and_merge(outname):  #reads each tempfile in and then adds the conten
     global tempfiles
 
     tempfiles = glob.glob('*.dictemp')
+    tempfiles.sort()
     with open(outname,'w') as outfile:
         for file in tempfiles:
             print '[+] Processing %s' % file
@@ -33,7 +34,7 @@ def dedupe_and_merge(outname):  #reads each tempfile in and then adds the conten
             gc.collect()
 
 def cleanup_temp():         #delets the dictemp files
-   print '[+] Cleaning up tempfiles' % file
+   print '[+] Cleaning up tempfiles'
    for tfile in tempfiles:
         os.remove(tfile)
 
