@@ -40,12 +40,12 @@ def helpmsg():
           '                   Defaults to current directory.\n' \
           '  -e or --extension: specifies the extension of the input dictionaries\n' \
           '  -o or --output: Specifies the output file name of the new dictionary\n'
-
+tempfiles = []
+directory = os.curdir
+extension = 'dic'
 if __name__ == '__main__':
     #Program defaults
-    directory = os.curdir
-    extension = 'dic'
-    tempfiles = []
+
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'hd:e:o:',['help', 'directory=', 'extension=', 'output='])
     except getopt.GetoptError as err:
