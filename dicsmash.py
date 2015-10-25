@@ -16,7 +16,9 @@ def split_to_size(file):    #read file line by line and copy the password into a
 
 def dedupe_and_merge(outname):  #reads each tempfile in and then adds the contents to a set.
     #Then the system outputs the set to a file and combines all of the sets to one file.
+    global tempfiles
     working_list = []
+    tempfiles = glob.glob('*.dictemp')
     with open(outname,'w') as outfile:
         for file in tempfiles:
             with open(file) as current_working_file:
@@ -28,8 +30,7 @@ def dedupe_and_merge(outname):  #reads each tempfile in and then adds the conten
             outfile.write(line)
 
 def cleanup_temp():         #delets the dictemp files
-    tempfiles = glob.glob('*.dictemp')
-    for tfile in tempfiles:
+   for tfile in tempfiles:
         os.remove(tfile)
 
 def helpmsg():
@@ -44,6 +45,7 @@ if __name__ == '__main__':
     #Program defaults
     directory = os.curdir
     extension = 'dic'
+    tempfiles = []
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'hd:e:o:',['help', 'directory=', 'extension=', 'output='])
     except getopt.GetoptError as err:
