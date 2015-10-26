@@ -4,33 +4,46 @@ import sys
 import glob
 import os
 import getopt
-
+import datetime
 
 def split_to_size(file):    #read file line by line and copy the password into a file that corresponds to the length
+    if verbose_mode == True:
+        print '[+] Splitting %s' % file
     with open(file) as origionaldic:
         for line in origionaldic:
             current_length = len(line.rstrip())
-            tempfile = str(str(current_length)+'.dictemp')
-            with open(tempfile, 'a') as a:
-                 a.write(line)
+            if current_length < max_length:
+                    tempfile = str(str(current_length)+'.dictemp')
+                    with open(tempfile, 'a') as a:
+                         a.write(line)
+
 
 def dedupe_and_merge(outname):  #reads each tempfile in and then adds the contents to a set.
     #Then the system outputs the set to a file and combines all of the sets to one file.
-    working_list = []
+    import gc
+    global tempfiles
+
+    tempfiles = glob.glob('*.dictemp')
+    tempfiles.sort()
     with open(outname,'w') as outfile:
         for file in tempfiles:
+            if verbose_mode == True:
+                print '[*] Processing %s' % file
+                print_elapsed()
+            working_set = set()
             with open(file) as current_working_file:
                 for line in current_working_file:
-                    working_list.append(line)
-        gc.collect()
-        working_set = set(working_list)
-        for line in working_set:
-            outfile.write(line)
+                    working_set.add(line)
+            for item in working_set:
+                outfile.write(item)
+            gc.collect()
 
 def cleanup_temp():         #delets the dictemp files
-    tempfiles = glob.glob('*.dictemp')
+    if verbose_mode == True:
+        print '[+] Cleaning up tempfiles'
     for tfile in tempfiles:
         os.remove(tfile)
+
 
 def helpmsg():
     print 'Usage: dicsmash.py [Options] ' \
@@ -38,14 +51,29 @@ def helpmsg():
           '  -d or --directory: uses the directory specified.\n' \
           '                   Defaults to current directory.\n' \
           '  -e or --extension: specifies the extension of the input dictionaries\n' \
-          '  -o or --output: Specifies the output file name of the new dictionary\n'
+          '  -o or --output: Specifies the output file name of the new dictionary\n' \
+          '  -v or --verbose: Creates verbose output\n'\
+          '  -m or --max:     Sets the max length of the passwords to include\n'
 
+def print_elapsed():
+    global elapsed_time
+    elapsed_time = datetime.datetime.now() - start_time
+    if verbose_mode == True:
+        print '[+] %s since start' % elapsed_time
+max_length = 9999
+tempfiles = []
+directory = os.curdir
+extension = 'dic'
+working_dir = os.curdir
+verbose_mode = False
+start_time = datetime.datetime.now()
+elapsed_time = datetime.datetime.now() - start_time
 if __name__ == '__main__':
     #Program defaults
-    directory = os.curdir
-    extension = 'dic'
+
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hd:e:o:',['help', 'directory=', 'extension=', 'output='])
+        opts, args = getopt.getopt(sys.argv[1:], 'hd:e:o:vm:',['help', 'directory=', 'extension=', 'output=',
+                                                               'verbose','max='])
     except getopt.GetoptError as err:
         helpmsg()
         print str(err)
@@ -61,6 +89,14 @@ if __name__ == '__main__':
             extension = arg
         elif opt in ('-o', '--output'):
             outputfile = arg
+        elif opt in ('-v', '--verbose'):
+            verbose_mode = True
+        elif opt in ('-m', '--max'):
+            try:
+                max_length = int(arg)
+            except:
+                print "Max length must be an int.  %s  is not an int" % max_length
+
 
     try:
         os.chdir(working_dir)
@@ -74,8 +110,13 @@ if __name__ == '__main__':
         sys.exit(2)
 
 
-
     for file in filetype:
         split_to_size(file)
+        print_elapsed()
     dedupe_and_merge(outputfile)
     cleanup_temp()
+    elapsed_time = datetime.datetime.now() - start_time
+    print_elapsed()
+    finished_time = datetime.datetime.now()
+    print '[*] Finished after %s seconds' % elapsed_time
+
