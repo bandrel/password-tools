@@ -12,9 +12,11 @@ def split_to_size(file):    #read file line by line and copy the password into a
     with open(file) as origionaldic:
         for line in origionaldic:
             current_length = len(line.rstrip())
-            tempfile = str(str(current_length)+'.dictemp')
-            with open(tempfile, 'a') as a:
-                 a.write(line)
+            if current_length < max_length:
+                    tempfile = str(str(current_length)+'.dictemp')
+                    with open(tempfile, 'a') as a:
+                         a.write(line)
+
 
 def dedupe_and_merge(outname):  #reads each tempfile in and then adds the contents to a set.
     #Then the system outputs the set to a file and combines all of the sets to one file.
@@ -50,12 +52,15 @@ def helpmsg():
           '                   Defaults to current directory.\n' \
           '  -e or --extension: specifies the extension of the input dictionaries\n' \
           '  -o or --output: Specifies the output file name of the new dictionary\n' \
-          '  -v or --verbose: Creates verbose output\n'
+          '  -v or --verbose: Creates verbose output\n'\
+          '  -m or --max:     Sets the max length of the passwords to include\n'
+
 def print_elapsed():
     global elapsed_time
     elapsed_time = datetime.datetime.now() - start_time
     if verbose_mode == True:
         print '[+] %s since start' % elapsed_time
+max_length = 9999
 tempfiles = []
 directory = os.curdir
 extension = 'dic'
@@ -67,7 +72,8 @@ if __name__ == '__main__':
     #Program defaults
 
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hd:e:o:v',['help', 'directory=', 'extension=', 'output=','verbose'])
+        opts, args = getopt.getopt(sys.argv[1:], 'hd:e:o:vm:',['help', 'directory=', 'extension=', 'output=',
+                                                               'verbose','max='])
     except getopt.GetoptError as err:
         helpmsg()
         print str(err)
@@ -85,6 +91,11 @@ if __name__ == '__main__':
             outputfile = arg
         elif opt in ('-v', '--verbose'):
             verbose_mode = True
+        elif opt in ('-m', '--max'):
+            try:
+                max_length = int(arg)
+            except:
+                print "Max length must be an int.  %s  is not an int" % max_length
 
 
     try:
