@@ -12,6 +12,7 @@ import credsfinder
 import getopt
 import pack.statsgen
 import collections
+from decimal import *
 
 
 def runstats(hcoutput, ntdsdump):
@@ -48,17 +49,17 @@ def runstats(hcoutput, ntdsdump):
     # Determine the number of username/hash combos cracked.
     userpwcomboscracked = len(crackedcreds)
     try:
-        uniquepercentcracked = round(float(uniquepwscracked) / uniquepwsran * 100)
+        uniquepercentcracked = Decimal(str(float(uniquepwscracked) / uniquepwsran))
     except ZeroDivisionError:
         uniquepercentcracked = 0
-    print '%d/%d (%d%%) unique passwords cracked' % (
+    print '{}/{} ({:.2%}) unique passwords cracked'.format(
         uniquepwscracked, uniquepwsran, uniquepercentcracked)
     try:
-        percentcracked = round(float(userpwcomboscracked) / userpwcombossran * 100)
+        percentcracked = Decimal(str(float(userpwcomboscracked) / userpwcombossran))
     except ZeroDivisionError:
         percentcracked = 0
-    print '%d/%d (%d%%) username/password combinations cracked ' \
-          '(includes duplicate passwords across multiple users)\n' % (
+    print '{}/{} ({:.2%}) username/password combinations cracked ' \
+          '(includes duplicate passwords across multiple users)\n'.format(
               userpwcomboscracked, userpwcombossran, percentcracked)
 
     if ignoreHistory0:
@@ -73,14 +74,14 @@ def runstats(hcoutput, ntdsdump):
 
         # Print the top popular passwords.
         print 'Top %d popular passwords:' % popularPasswordCount
-        print '\n                     Password | Usage Count'
-        print '                    ------------------------'
+        print '\n                               Password | Usage Count'
+        print '                              ------------------------'
         # Process and sort the passwords in popularPasswords dictionary
         toppwkeys = sorted(
             popularpwsdict.keys(), key=popularpwsdict.get, reverse=True)
         for count in xrange(popularPasswordCount):
             try:
-                print '%30s: %d' % (
+                print '%40s: %d' % (
                     toppwkeys[count].rstrip(),
                     popularpwsdict[toppwkeys[count]])
             except IndexError:
@@ -133,6 +134,7 @@ showHistoryStats = False  # Show a stats block for history passwords
 showCombinedStats = False  # Combine stats of both modern and history passwords
 showUncracked = False  # Print usernames with uncracked passwords
 ignoreBlankPWUsers = True  # Ignore users whose hash == blank password
+getcontext().rounding = ROUND_HALF_UP  # Configure proper rounding for decimal module
 
 try:
     opts, args = getopt.getopt(sys.argv[1:], 'hm:pc:CMHub',
