@@ -11,6 +11,7 @@
 # Please see the attached LICENSE file for additional licensing information.
 
 import operator, string
+from decimal import *
 
 VERSION = "0.0.3"
 
@@ -172,32 +173,32 @@ class StatsGen:
         """ Print password statistics. """
 
         print "\nLength Stats:"
-        print '\n              Password Length | Percentage'
-        print '                 ------------------------------'
+        print '\n                        Password Length | Percentage'
+        print '                           ------------------------------'
         for (length,count) in sorted(self.stats_length.iteritems(), key=operator.itemgetter(1), reverse=True):
             if self.hiderare and not count*100/self.filter_counter > 0: continue
-            print "%30d: %02d%% (%d)" % (length, count*100/self.filter_counter, count)
+            print "%40d: %02s%% (%d)" % (length, round(Decimal(str(count*100.0/self.filter_counter)), 2), count)
 
         print "\nCharacter-set Stats:\n"
         for (char,count) in sorted(self.stats_charactersets.iteritems(), key=operator.itemgetter(1), reverse=True):
             if self.hiderare and not count*100/self.filter_counter > 0: continue
-            print "%30s: %02d%% (%d)" % (char, count*100/self.filter_counter, count)
+            print "%40s: %02s%% (%d)" % (char, round(Decimal(str(count*100.0/self.filter_counter)), 2), count)
 
         print "\nPassword complexity:\n"
-        print "                     digit: min(%s) max(%s)" % (self.mindigit, self.maxdigit)
-        print "                     lower: min(%s) max(%s)" % (self.minlower, self.maxlower)
-        print "                     upper: min(%s) max(%s)" % (self.minupper, self.maxupper)
-        print "                   special: min(%s) max(%s)" % (self.minspecial, self.maxspecial)
+        print "                               digit: min(%s) max(%s)" % (self.mindigit, self.maxdigit)
+        print "                               lower: min(%s) max(%s)" % (self.minlower, self.maxlower)
+        print "                               upper: min(%s) max(%s)" % (self.minupper, self.maxupper)
+        print "                             special: min(%s) max(%s)" % (self.minspecial, self.maxspecial)
 
         print "\nCommon Masks:\n"
         for (simplemask,count) in sorted(self.stats_simplemasks.iteritems(), key=operator.itemgetter(1), reverse=True):
             if self.hiderare and not count*100/self.filter_counter > 0: continue
-            print "%30s: %02d%% (%d)" % (simplemask, count*100/self.filter_counter, count)
+            print "%40s: %02s%% (%d)" % (simplemask, round(Decimal(str(count*100.0/self.filter_counter)), 2), count)
 
         print "\nAdvanced Masks:\n"
         for (advancedmask,count) in sorted(self.stats_advancedmasks.iteritems(), key=operator.itemgetter(1), reverse=True):
             if count*100/self.filter_counter > 0:
-                print "%30s: %02d%% (%d)" % (advancedmask, count*100/self.filter_counter, count)
+                print "%40s: %02s%% (%d)" % (advancedmask, round(Decimal(str(count*100.0/self.filter_counter)), 2), count)
 
             if self.output_file:
                 self.output_file.write("%s,%d\n" % (advancedmask,count))
