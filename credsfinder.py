@@ -14,7 +14,7 @@ def gen_dict(user_hash_list, hash_pass_list):
     uncracked = []
     for item in user_hash_list:
         # Splits the username and password hash into two variables
-        username, phash = item.rstrip().split(":")
+        username, phash = item.rstrip().split(":",1)
         phash = phash.lower()
         # Stores the password hash into the userhash dict
         userhash[username] = phash

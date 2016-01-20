@@ -13,6 +13,7 @@ import getopt
 import pack.statsgen
 import collections
 from decimal import *
+import re
 
 
 def runstats(hcoutput, ntdsdump):
@@ -103,7 +104,15 @@ def runstats(hcoutput, ntdsdump):
     print '\n\n*************************************************************' \
           '***********************************\n\n'
     return
-
+def outputcracked(hcoutput, ntdsdump):
+    history = re.compile(r"history0")
+    dic, uncracked = credsfinder.gen_dict(ntdsdump,hcoutput)
+    with open(crackedOutputfile, 'a') as file:
+        for username, password_hash in dic.iteritems():
+            if re.search(history, str(username)) is None:
+                line = str(username)+'\t'+str(password_hash[0])+'\n'
+                file.write(line)
+    return
 
 def helpmsg():
     print 'Usage: cracked_hash_stats.py [Options] ' \
@@ -121,7 +130,8 @@ def helpmsg():
           '  -C or --combined: Shows statistics for both current and ' \
           'historical passwords\n'\
           '  -u or --uncracked: Prints usernames with uncracked passwords\n' \
-          '  -b or --blank: Includes users with hashes of blank passwords\n'
+          '  -b or --blank: Includes users with hashes of blank passwords\n'\
+          '  -U or --cracked-users <file>: Output the cracked usernames to the file specified'
     return
 
 
@@ -135,11 +145,12 @@ showCombinedStats = False  # Combine stats of both modern and history passwords
 showUncracked = False  # Print usernames with uncracked passwords
 ignoreBlankPWUsers = True  # Ignore users whose hash == blank password
 getcontext().rounding = ROUND_HALF_UP  # Configure proper rounding for decimal module
-
+exportCracked = False
+crackedOutputfile = 'cracked_usernames.txt'      #default filename for cracked usernames output
 try:
-    opts, args = getopt.getopt(sys.argv[1:], 'hm:pc:CMHub',
+    opts, args = getopt.getopt(sys.argv[1:], 'hm:pc:CMHubU:',
                                ['help', 'popular', 'popcount=', 'combined',
-                                'modern', 'history', 'uncracked=', 'blank'])
+                                'modern', 'history', 'uncracked=', 'blank','cracked-users='])
 except getopt.GetoptError as err:
     helpmsg()
     print str(err)
@@ -162,6 +173,9 @@ for opt, arg in opts:
         showUncracked = True
     elif opt in ('-b', '--blank'):
         ignoreBlankPWUsers = False
+    elif opt in ('-U', '--cracked-users'):
+        exportCracked = True
+        crackedOutputfile = arg
 try:
     hashcatOutputArgument = args[0]
     ntdsDumpArgument = args[1]
@@ -201,20 +215,37 @@ with open(hashcatOutputArgument, 'r') as hashcatOutputFile:
     hashcatOutput = hashcatOutputFile.readlines()
 
 # Where the real work begins
+if exportCracked is True:
+    with open(crackedOutputfile, 'wb'):   # initializes the file since the function appends.
+        pass
 if showCombinedStats:
     print '********************************\n' \
           '    Combined Password Stats\n' \
           '********************************'
     runstats(hashcatOutput, ntdsDumpCombined)
+    if exportCracked is True:
+        outputcracked(hashcatOutput, ntdsDumpCombined)
 
 if showModernStats:
     print '********************************\n' \
           '     Modern Password Stats\n' \
           '********************************'
     runstats(hashcatOutput, ntdsDumpModern)
-
+    if exportCracked is True:
+        outputcracked(hashcatOutput, ntdsDumpModern)
 if showHistoryStats:
     print '********************************\n' \
           '     History Password Stats\n' \
           '********************************'
     runstats(hashcatOutput, ntdsDumpHistory)
+    if exportCracked is True:
+        outputcracked(hashcatOutput, ntdsDumpHistory)
+
+output_set = set()
+with open(crackedOutputfile, 'r') as a:
+    for line in a:
+        output_set.add(line.rstrip())
+with open(crackedOutputfile, 'w') as a:
+    for line in output_set:
+        a.write(line)
+
