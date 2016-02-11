@@ -96,7 +96,7 @@ def runstats(hcoutput, ntdsdump):
     # password length/complexity/character sets/etc.
     statsgen = pack.statsgen.StatsGen()
     statsgen.generate_stats(crackedpws)
-    statsgen.print_stats()
+    statsgen.print_stats(uniquepwscracked)
     print '\nTotal number of user/password ' \
           'combinations not cracked: %d' % len(uncracked)
     print ''
