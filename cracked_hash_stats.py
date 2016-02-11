@@ -247,5 +247,5 @@ with open(crackedOutputfile, 'r') as a:
         output_set.add(line.rstrip())
 with open(crackedOutputfile, 'w') as a:
     for line in output_set:
-        a.write(line)
+        a.write(line + '\n')
 
