@@ -50,6 +50,8 @@ class StatsGen:
         self.maxlower   = None
         self.maxspecial = None
 
+        self.uniqecrackedpws = set()
+        self.charcountdict = dict()
     def analyze_password(self, password):
 
         # Password length
@@ -118,7 +120,13 @@ class StatsGen:
 
     def generate_stats(self, passwords):
         """ Generate password statistics. """
-
+        # track uniqe cracked password for the character count statistic
+        self.uniqecrackedpws = set(passwords)
+        for pw in self.uniqecrackedpws:
+            try:
+                self.charcountdict[len(pw)] += 1
+            except KeyError:
+                self.charcountdict[len(pw)] = 1
         for password in passwords:
             password = password.rstrip()
 
@@ -172,10 +180,10 @@ class StatsGen:
     def print_stats(self):
         """ Print password statistics. """
 
-        print "\nLength Stats:"
+        print "\nLength Stats of Unique Passwords:"
         print '\n                        Password Length | Percentage'
         print '                           ------------------------------'
-        for (length,count) in sorted(self.stats_length.iteritems(), key=operator.itemgetter(1), reverse=True):
+        for (length,count) in sorted(self.charcountdict.iteritems(), key=lambda d: d[1], reverse=True):
             if self.hiderare and not count*100/self.filter_counter > 0: continue
             print "%40d: %02s%% (%d)" % (length, round(Decimal(str(count*100.0/self.filter_counter)), 2), count)
 
