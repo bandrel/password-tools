@@ -24,6 +24,8 @@ def runstats(hcoutput, ntdsdump):
     # lines in a set.
     for dumpline in ntdsdump:
         try:
+            if dumpline.split(':')[1].lower() in allhashset:
+                sharedHashSet.add(dumpline.split(':')[1].lower())
             allhashset.add(dumpline.split(':')[1].lower())
         except IndexError:
             print "Warning: line containing '" + dumpline + "' not processed"
@@ -105,6 +107,12 @@ def runstats(hcoutput, ntdsdump):
             print user
     print '\n\n*************************************************************' \
           '***********************************\n\n'
+    if gatherShared:
+        with open(sharedOutputFile, 'w') as f:
+            for hash in sharedHashSet:
+                for currentline in ntdsdump:
+                    if hash.lower() == currentline.split(':')[1].lower():
+                        f.write(currentline.split(':')[0] + '\t' + hash.lower() + '\n')
     return
 
 
@@ -124,6 +132,8 @@ def helpmsg():
           '  -C or --combined: Shows statistics for both current and ' \
           'historical passwords\n'\
           '  -u or --uncracked: Prints usernames with uncracked passwords\n' \
+          '  -s or --shared <file>: output a file with users who do not have a' \
+          '                         unique password hash' \
           '  -b or --blank: Includes users with hashes of blank passwords\n'
     return
 
@@ -138,11 +148,14 @@ showCombinedStats = False  # Combine stats of both modern and history passwords
 showUncracked = False  # Print usernames with uncracked passwords
 ignoreBlankPWUsers = True  # Ignore users whose hash == blank password
 getcontext().rounding = ROUND_HALF_UP  # Configure proper rounding for decimal module
+gatherShared = False # Output list of users who have a shared hash
+sharedOutputFile = 'users_with_shared_hashes.txt'
+sharedHashSet = set()
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], 'hm:pc:CMHub',
+    opts, args = getopt.getopt(sys.argv[1:], 'hm:pc:CMHubs:',
                                ['help', 'popular', 'popcount=', 'combined',
-                                'modern', 'history', 'uncracked=', 'blank'])
+                                'modern', 'history', 'uncracked=', 'blank', 'shared='])
 except getopt.GetoptError as err:
     helpmsg()
     print str(err)
@@ -165,6 +178,9 @@ for opt, arg in opts:
         showUncracked = True
     elif opt in ('-b', '--blank'):
         ignoreBlankPWUsers = False
+    elif opt in ('-s', '--shared'):
+        gatherShared = True
+        sharedOutputFile = arg
 try:
     hashcatOutputArgument = args[0]
     ntdsDumpArgument = args[1]
