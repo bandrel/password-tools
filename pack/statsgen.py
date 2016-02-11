@@ -177,15 +177,19 @@ class StatsGen:
                     self.stats_advancedmasks[advancedmask] = 1
 
 
-    def print_stats(self):
+    def print_stats(self, uniques):
         """ Print password statistics. """
 
-        print "\nLength Stats of Unique Passwords:"
+        print "\nLength Stats of Unique Cracked Passwords:"
         print '\n                        Password Length | Percentage'
         print '                           ------------------------------'
+        pwchars = int()
         for (length,count) in sorted(self.charcountdict.iteritems(), key=lambda d: d[1], reverse=True):
             if self.hiderare and not count*100/self.filter_counter > 0: continue
+            pwchars += (length * count)
             print "%40d: %02s%% (%d)" % (length, round(Decimal(str(count*100.0/self.filter_counter)), 2), count)
+        averagepwlength = round(Decimal(str(pwchars/float(uniques))), 2)
+        print '\n          Average Unique Cracked Password Length: ' + str(averagepwlength) + ' characters\n'
 
         print "\nCharacter-set Stats:\n"
         for (char,count) in sorted(self.stats_charactersets.iteritems(), key=operator.itemgetter(1), reverse=True):
