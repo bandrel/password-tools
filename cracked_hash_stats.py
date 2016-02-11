@@ -261,11 +261,11 @@ if showHistoryStats:
     if exportCracked is True:
         outputcracked(hashcatOutput, ntdsDumpHistory)
 
-output_set = set()
-with open(crackedOutputfile, 'r') as a:
-    for line in a:
-        output_set.add(line.rstrip())
-with open(crackedOutputfile, 'w') as a:
-    for line in output_set:
-        a.write(line + '\n')
-
+if exportCracked:
+    output_set = set()
+    with open(crackedOutputfile, 'r') as a:
+        for line in a:
+            output_set.add(line.rstrip())
+    with open(crackedOutputfile, 'w') as a:
+        for line in output_set:
+            a.write(line + '\n')
