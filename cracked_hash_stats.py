@@ -142,8 +142,8 @@ def helpmsg():
           'historical passwords\n'\
           '  -u or --uncracked: Prints usernames with uncracked passwords\n' \
           '  -b or --blank: Includes users with hashes of blank passwords\n'\
-          '  -U or --cracked-users <file>: Output the cracked usernames to the file specified'\
-          '  -s or --shared <file>: output a file with users who do not have a' \
+          '  -U or --cracked-users <file>: Output the cracked usernames to the file specified\n'\
+          '  -s or --shared <file>: output a file with users who do not have a\n' \
           '                         unique password hash'
     return
 
