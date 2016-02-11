@@ -23,7 +23,10 @@ def runstats(hcoutput, ntdsdump):
     # Determine the number of unique hashes processed by placing all ntds dump
     # lines in a set.
     for dumpline in ntdsdump:
-        allhashset.add(dumpline.split(':')[1].lower())
+        try:
+            allhashset.add(dumpline.split(':')[1].lower())
+        except IndexError:
+            print "Warning: line containing '" + dumpline + "' not processed"
     uniquepwsran = len(allhashset)
 
     # Make a dictionary of all users with cracked passwords. Username is the
