@@ -14,10 +14,7 @@ def gen_dict(user_hash_list, hash_pass_list):
     uncracked = []
     for item in user_hash_list:
         # Splits the username and password hash into two variables
-        try:
-            username, phash = item.rstrip().split(":")
-        except ValueError:
-            pass
+        username, phash = item.rstrip().split(":",1)
         phash = phash.lower()
         # Stores the password hash into the userhash dict
         userhash[username] = phash
@@ -26,10 +23,7 @@ def gen_dict(user_hash_list, hash_pass_list):
         # colon as the delimiter.  In the event that there is a a colon in
         # the plaintext password then the line will be split at the first
         # colon.
-        try:
-            phash, password = item.rstrip().split(":",1)
-        except ValueError:
-            print "Warning: line containing '" + item.rstrip() + "' not processed"
+        phash, password = item.rstrip().split(":",1)
         # Stores the plaintext password into the hashpass dict
         hashpass[phash] = password
 
