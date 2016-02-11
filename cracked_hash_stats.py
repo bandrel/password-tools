@@ -24,7 +24,12 @@ def runstats(hcoutput, ntdsdump):
     # Determine the number of unique hashes processed by placing all ntds dump
     # lines in a set.
     for dumpline in ntdsdump:
-        allhashset.add(dumpline.split(':')[1].lower())
+        try:
+            if dumpline.split(':')[1].lower() in allhashset:
+                sharedHashSet.add(dumpline.split(':')[1].lower())
+            allhashset.add(dumpline.split(':')[1].lower())
+        except IndexError:
+            print "Warning: line containing '" + dumpline + "' not processed"
     uniquepwsran = len(allhashset)
 
     # Make a dictionary of all users with cracked passwords. Username is the
@@ -94,7 +99,7 @@ def runstats(hcoutput, ntdsdump):
     # password length/complexity/character sets/etc.
     statsgen = pack.statsgen.StatsGen()
     statsgen.generate_stats(crackedpws)
-    statsgen.print_stats()
+    statsgen.print_stats(uniquepwscracked)
     print '\nTotal number of user/password ' \
           'combinations not cracked: %d' % len(uncracked)
     print ''
@@ -103,6 +108,12 @@ def runstats(hcoutput, ntdsdump):
             print user
     print '\n\n*************************************************************' \
           '***********************************\n\n'
+    if gatherShared:
+        with open(sharedOutputFile, 'w') as f:
+            for hash in sharedHashSet:
+                for currentline in ntdsdump:
+                    if hash.lower() == currentline.split(':')[1].lower():
+                        f.write(currentline.split(':')[0] + '\t' + hash.lower() + '\n')
     return
 def outputcracked(hcoutput, ntdsdump):
     history = re.compile(r"history0")
@@ -131,7 +142,9 @@ def helpmsg():
           'historical passwords\n'\
           '  -u or --uncracked: Prints usernames with uncracked passwords\n' \
           '  -b or --blank: Includes users with hashes of blank passwords\n'\
-          '  -U or --cracked-users <file>: Output the cracked usernames to the file specified'
+          '  -U or --cracked-users <file>: Output the cracked usernames to the file specified'\
+          '  -s or --shared <file>: output a file with users who do not have a' \
+          '                         unique password hash'
     return
 
 
@@ -147,10 +160,14 @@ ignoreBlankPWUsers = True  # Ignore users whose hash == blank password
 getcontext().rounding = ROUND_HALF_UP  # Configure proper rounding for decimal module
 exportCracked = False
 crackedOutputfile = 'cracked_usernames.txt'      #default filename for cracked usernames output
+gatherShared = False # Output list of users who have a shared hash
+sharedOutputFile = 'users_with_shared_hashes.txt'
+sharedHashSet = set()
+
 try:
-    opts, args = getopt.getopt(sys.argv[1:], 'hm:pc:CMHubU:',
+    opts, args = getopt.getopt(sys.argv[1:], 'hm:pc:CMHubU:s:',
                                ['help', 'popular', 'popcount=', 'combined',
-                                'modern', 'history', 'uncracked=', 'blank','cracked-users='])
+                                'modern', 'history', 'uncracked=', 'blank', 'shared=','cracked-users='])
 except getopt.GetoptError as err:
     helpmsg()
     print str(err)
@@ -176,6 +193,9 @@ for opt, arg in opts:
     elif opt in ('-U', '--cracked-users'):
         exportCracked = True
         crackedOutputfile = arg
+    elif opt in ('-s', '--shared'):
+        gatherShared = True
+        sharedOutputFile = arg
 try:
     hashcatOutputArgument = args[0]
     ntdsDumpArgument = args[1]
