@@ -114,6 +114,13 @@ def runstats(hcoutput, ntdsdump):
                 for currentline in ntdsdump:
                     if hash.lower() == currentline.split(':')[1].lower():
                         f.write(currentline.split(':')[0] + '\t' + hash.lower() + '\n')
+    # Write out interesting usernames and passwords
+    if exportInteresting:
+        with open(interestingOutputFile, 'w') as f:
+            for iname in interestingNames:
+                for name in crackedcreds.keys():
+                    if iname in name:
+                        f.write(name + '\t' + crackedcreds[name][0] + '\n')
     return
 def outputcracked(hcoutput, ntdsdump):
     history = re.compile(r"history0")
@@ -139,12 +146,17 @@ def helpmsg():
           '  -M or --modern: Prints the statistics for current passwords. \n' \
           '  -H or --history: Prints the statistics for history passwords\n' \
           '  -C or --combined: Shows statistics for both current and ' \
-          'historical passwords\n'\
+          '                    historical passwords\n'\
           '  -u or --uncracked: Prints usernames with uncracked passwords\n' \
           '  -b or --blank: Includes users with hashes of blank passwords\n'\
-          '  -U or --cracked-users <file>: Output the cracked usernames to the file specified\n'\
+          '  -U or --cracked-users <file>: Output the cracked usernames to the\n' \
+          '                                file specified\n'\
           '  -s or --shared <file>: output a file with users who do not have a\n' \
-          '                         unique password hash'
+          '                         unique password hash\n' \
+          '  -i or --interesting <file>: output a file of cracked account with\n' \
+          '                              with usernames that could be more\n' \
+          '                              valuable than average i.e. admin, root\n' \
+          '                              svc, sql, etc'
     return
 
 
@@ -163,11 +175,14 @@ crackedOutputfile = 'cracked_usernames.txt'      #default filename for cracked u
 gatherShared = False # Output list of users who have a shared hash
 sharedOutputFile = 'users_with_shared_hashes.txt'
 sharedHashSet = set()
+exportInteresting = False
+interestingOutputFile = 'interesting_cracked_users.txt'
+interestingNames = ('admin', 'svc', 'service', 'root', 'apc', 'altiris', 'sql', 'manage', 'cisco')
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], 'hm:pc:CMHubU:s:',
+    opts, args = getopt.getopt(sys.argv[1:], 'hm:pc:CMHubU:s:i:',
                                ['help', 'popular', 'popcount=', 'combined',
-                                'modern', 'history', 'uncracked=', 'blank', 'shared=','cracked-users='])
+                                'modern', 'history', 'uncracked=', 'blank', 'shared=','cracked-users=','interesting='])
 except getopt.GetoptError as err:
     helpmsg()
     print str(err)
@@ -196,6 +211,9 @@ for opt, arg in opts:
     elif opt in ('-s', '--shared'):
         gatherShared = True
         sharedOutputFile = arg
+    elif opt in ('-i', '--interesting'):
+        exportInteresting = True
+        interestingOutputFile = arg
 try:
     hashcatOutputArgument = args[0]
     ntdsDumpArgument = args[1]
