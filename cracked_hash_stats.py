@@ -103,9 +103,11 @@ def runstats(hcoutput, ntdsdump):
     print '\nTotal number of user/password ' \
           'combinations not cracked: %d' % len(uncracked)
     print ''
-    if showUncracked:
-        for user in uncracked:
-            print user
+    if outputUncracked:
+        with open(uncrackedOutputfile,'w') as outputfile:
+            for user in uncracked:
+                outputfile.write(user+'\n')
+            print 'Uncracked usernames output to ' + str(uncrackedOutputfile)
     print '\n\n*************************************************************' \
           '***********************************\n\n'
     if gatherShared:
@@ -147,7 +149,8 @@ def helpmsg():
           '  -H or --history: Prints the statistics for history passwords\n' \
           '  -C or --combined: Shows statistics for both current and ' \
           '                    historical passwords\n'\
-          '  -u or --uncracked: Prints usernames with uncracked passwords\n' \
+          '  -u or --uncracked <file>: Output the cracked uncracked usernames to\n' \
+          '                            the file specified\n'\
           '  -b or --blank: Includes users with hashes of blank passwords\n'\
           '  -U or --cracked-users <file>: Output the cracked usernames to the\n' \
           '                                file specified\n'\
@@ -167,7 +170,7 @@ ignoreHistory0 = True  # Ignore history0 entries *_history0 hashes
 showModernStats = True  # Show a stats block for current passwords
 showHistoryStats = False  # Show a stats block for history passwords
 showCombinedStats = False  # Combine stats of both modern and history passwords
-showUncracked = False  # Print usernames with uncracked passwords
+outputUncracked = False  # Print usernames with uncracked passwords
 ignoreBlankPWUsers = True  # Ignore users whose hash == blank password
 getcontext().rounding = ROUND_HALF_UP  # Configure proper rounding for decimal module
 exportCracked = False
@@ -180,7 +183,7 @@ interestingOutputFile = 'interesting_cracked_users.txt'
 interestingNames = ('admin', 'svc', 'service', 'root', 'apc', 'altiris', 'sql', 'manage', 'cisco')
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], 'hm:pc:CMHubU:s:i:',
+    opts, args = getopt.getopt(sys.argv[1:], 'hm:pc:CMHu:bU:s:i:',
                                ['help', 'popular', 'popcount=', 'combined',
                                 'modern', 'history', 'uncracked=', 'blank', 'shared=','cracked-users=','interesting='])
 except getopt.GetoptError as err:
@@ -202,7 +205,8 @@ for opt, arg in opts:
     elif opt in ('-H', '--history'):
         showHistoryStats = True
     elif opt in ('-u', '--uncracked'):
-        showUncracked = True
+        outputUncracked = True
+        uncrackedOutputfile = arg
     elif opt in ('-b', '--blank'):
         ignoreBlankPWUsers = False
     elif opt in ('-U', '--cracked-users'):
