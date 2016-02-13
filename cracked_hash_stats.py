@@ -16,7 +16,13 @@ from decimal import *
 import re
 
 
-def runstats(hcoutput, ntdsdump):
+def runstats(mode,hcoutput, ntdsdump):
+    if ntdsdump == []:
+        print 'There are no '+mode+' passwords\n'
+        return
+    print '********************************\n' \
+          '    '+mode+' Password Stats\n' \
+          '********************************'
     allhashset = set()
     crackedhashset = set()
     popularpwsdict = collections.defaultdict(int)
@@ -123,13 +129,15 @@ def runstats(hcoutput, ntdsdump):
                 for name in crackedcreds.keys():
                     if iname in name:
                         f.write(name + '\t' + crackedcreds[name][0] + '\n')
+    if exportCracked is True:
+        outputcracked(mode,hcoutput, ntdsdump)
     return
-def outputcracked(hcoutput, ntdsdump):
-    history = re.compile(r"history0")
+def outputcracked(mode,hcoutput, ntdsdump):
+    history0 = re.compile(r"history0")
     dic, uncracked = credsfinder.gen_dict(ntdsdump,hcoutput)
-    with open(crackedOutputfile, 'a') as file:
+    with open(mode+crackedOutputfile, 'w') as file:
         for username, password_hash in dic.iteritems():
-            if re.search(history, str(username)) is None:
+            if re.search(history0, str(username)) is None:
                 line = str(username)+'\t'+str(password_hash[0])+'\n'
                 file.write(line)
     return
@@ -261,33 +269,8 @@ if exportCracked is True:
     with open(crackedOutputfile, 'wb'):   # initializes the file since the function appends.
         pass
 if showCombinedStats:
-    print '********************************\n' \
-          '    Combined Password Stats\n' \
-          '********************************'
-    runstats(hashcatOutput, ntdsDumpCombined)
-    if exportCracked is True:
-        outputcracked(hashcatOutput, ntdsDumpCombined)
-
+    runstats('Combined',hashcatOutput, ntdsDumpCombined)
 if showModernStats:
-    print '********************************\n' \
-          '     Modern Password Stats\n' \
-          '********************************'
-    runstats(hashcatOutput, ntdsDumpModern)
-    if exportCracked is True:
-        outputcracked(hashcatOutput, ntdsDumpModern)
+    runstats('Modern',hashcatOutput, ntdsDumpModern)
 if showHistoryStats:
-    print '********************************\n' \
-          '     History Password Stats\n' \
-          '********************************'
-    runstats(hashcatOutput, ntdsDumpHistory)
-    if exportCracked is True:
-        outputcracked(hashcatOutput, ntdsDumpHistory)
-
-if exportCracked:
-    output_set = set()
-    with open(crackedOutputfile, 'r') as a:
-        for line in a:
-            output_set.add(line.rstrip())
-    with open(crackedOutputfile, 'w') as a:
-        for line in output_set:
-            a.write(line + '\n')
+    runstats('History',hashcatOutput, ntdsDumpHistory)
