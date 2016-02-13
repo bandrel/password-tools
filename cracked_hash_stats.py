@@ -135,7 +135,7 @@ def runstats(mode,hcoutput, ntdsdump):
 def outputcracked(mode,hcoutput, ntdsdump):
     history0 = re.compile(r"history0")
     dic, uncracked = credsfinder.gen_dict(ntdsdump,hcoutput)
-    with open(mode+crackedOutputfile, 'w') as file:
+    with open(mode+'-'+crackedOutputfile, 'w') as file:
         for username, password_hash in dic.iteritems():
             if re.search(history0, str(username)) is None:
                 line = str(username)+'\t'+str(password_hash[0])+'\n'
