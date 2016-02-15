@@ -188,7 +188,10 @@ class StatsGen:
             if self.hiderare and not count*100/self.filter_counter > 0: continue
             pwchars += (length * count)
             print "%40d: %02s%% (%d)" % (length, round(Decimal(str(count*100.0/self.filter_counter)), 2), count)
-        averagepwlength = round(Decimal(str(pwchars/float(uniques))), 2)
+        try:
+            averagepwlength = round(Decimal(str(pwchars/float(uniques))), 2)
+        except ZeroDivisionError:
+            averagepwlength = 0
         print '\n          Average Unique Cracked Password Length: ' + str(averagepwlength) + ' characters\n'
 
         print "\nCharacter-set Stats:\n"
