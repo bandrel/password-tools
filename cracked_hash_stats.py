@@ -16,7 +16,13 @@ from decimal import *
 import re
 
 
-def runstats(hcoutput, ntdsdump):
+def runstats(mode, hcoutput, ntdsdump):
+    if ntdsdump == []:
+        print 'There are no '+mode+' passwords\n'
+        return
+    print '********************************\n' \
+          '    '+mode+' Password Stats\n' \
+          '********************************'
     allhashset = set()
     crackedhashset = set()
     popularpwsdict = collections.defaultdict(int)
@@ -104,35 +110,40 @@ def runstats(hcoutput, ntdsdump):
           'combinations not cracked: %d' % len(uncracked)
     print ''
     if outputUncracked:
-        with open(uncrackedOutputfile,'w') as outputfile:
+        with open(mode+'-'+uncrackedOutputfile, 'w') as outputfile:
             for user in uncracked:
                 outputfile.write(user+'\n')
             print 'Uncracked usernames output to ' + str(uncrackedOutputfile)
     print '\n\n*************************************************************' \
           '***********************************\n\n'
     if gatherShared:
-        with open(sharedOutputFile, 'w') as f:
+        with open(mode+'-'+sharedOutputFile, 'w') as f:
             for hash in sharedHashSet:
                 for currentline in ntdsdump:
                     if hash.lower() == currentline.split(':')[1].lower():
                         f.write(currentline.split(':')[0] + '\t' + hash.lower() + '\n')
     # Write out interesting usernames and passwords
     if exportInteresting:
-        with open(interestingOutputFile, 'w') as f:
+        with open(mode+'-'+interestingOutputFile, 'w') as f:
             for iname in interestingNames:
                 for name in crackedcreds.keys():
                     if iname in name:
                         f.write(name + '\t' + crackedcreds[name][0] + '\n')
+    if exportCracked is True:
+        outputcracked(mode, hcoutput, ntdsdump)
     return
-def outputcracked(hcoutput, ntdsdump):
-    history = re.compile(r"history0")
+
+
+def outputcracked(mode, hcoutput, ntdsdump):
+    history0 = re.compile(r"history0")
     dic, uncracked = credsfinder.gen_dict(ntdsdump,hcoutput)
-    with open(crackedOutputfile, 'a') as file:
+    with open(mode+'-'+crackedOutputfile, 'w') as file:
         for username, password_hash in dic.iteritems():
-            if re.search(history, str(username)) is None:
-                line = str(username)+'\t'+str(password_hash[0])+'\n'
+            if re.search(history0, str(username)) is None:
+                line = str(username) + '\t' + str(password_hash[0]) + '\n'
                 file.write(line)
     return
+
 
 def helpmsg():
     print 'Usage: cracked_hash_stats.py [Options] ' \
@@ -174,8 +185,8 @@ outputUncracked = False  # Print usernames with uncracked passwords
 ignoreBlankPWUsers = True  # Ignore users whose hash == blank password
 getcontext().rounding = ROUND_HALF_UP  # Configure proper rounding for decimal module
 exportCracked = False
-crackedOutputfile = 'cracked_usernames.txt'      #default filename for cracked usernames output
-gatherShared = False # Output list of users who have a shared hash
+crackedOutputfile = 'cracked_usernames.txt' # default filename for cracked usernames output
+gatherShared = False  # Output list of users who have a shared hash
 sharedOutputFile = 'users_with_shared_hashes.txt'
 sharedHashSet = set()
 exportInteresting = False
@@ -185,7 +196,7 @@ interestingNames = ('admin', 'svc', 'service', 'root', 'apc', 'altiris', 'sql', 
 try:
     opts, args = getopt.getopt(sys.argv[1:], 'hm:pc:CMHu:bU:s:i:',
                                ['help', 'popular', 'popcount=', 'combined',
-                                'modern', 'history', 'uncracked=', 'blank', 'shared=','cracked-users=','interesting='])
+                                'modern', 'history', 'uncracked=', 'blank', 'shared=', 'cracked-users=', 'interesting='])
 except getopt.GetoptError as err:
     helpmsg()
     print str(err)
@@ -257,37 +268,9 @@ with open(hashcatOutputArgument, 'r') as hashcatOutputFile:
     hashcatOutput = hashcatOutputFile.readlines()
 
 # Where the real work begins
-if exportCracked is True:
-    with open(crackedOutputfile, 'wb'):   # initializes the file since the function appends.
-        pass
 if showCombinedStats:
-    print '********************************\n' \
-          '    Combined Password Stats\n' \
-          '********************************'
-    runstats(hashcatOutput, ntdsDumpCombined)
-    if exportCracked is True:
-        outputcracked(hashcatOutput, ntdsDumpCombined)
-
+    runstats('Combined', hashcatOutput, ntdsDumpCombined)
 if showModernStats:
-    print '********************************\n' \
-          '     Modern Password Stats\n' \
-          '********************************'
-    runstats(hashcatOutput, ntdsDumpModern)
-    if exportCracked is True:
-        outputcracked(hashcatOutput, ntdsDumpModern)
+    runstats('Modern', hashcatOutput, ntdsDumpModern)
 if showHistoryStats:
-    print '********************************\n' \
-          '     History Password Stats\n' \
-          '********************************'
-    runstats(hashcatOutput, ntdsDumpHistory)
-    if exportCracked is True:
-        outputcracked(hashcatOutput, ntdsDumpHistory)
-
-if exportCracked:
-    output_set = set()
-    with open(crackedOutputfile, 'r') as a:
-        for line in a:
-            output_set.add(line.rstrip())
-    with open(crackedOutputfile, 'w') as a:
-        for line in output_set:
-            a.write(line + '\n')
+    runstats('History', hashcatOutput, ntdsDumpHistory)
