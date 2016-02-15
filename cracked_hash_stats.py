@@ -186,7 +186,7 @@ ignoreBlankPWUsers = True  # Ignore users whose hash == blank password
 getcontext().rounding = ROUND_HALF_UP  # Configure proper rounding for decimal module
 exportCracked = False
 crackedOutputfile = 'cracked_usernames.txt' # default filename for cracked usernames output
-gatherShared = False # Output list of users who have a shared hash
+gatherShared = False  # Output list of users who have a shared hash
 sharedOutputFile = 'users_with_shared_hashes.txt'
 sharedHashSet = set()
 exportInteresting = False
@@ -268,12 +268,9 @@ with open(hashcatOutputArgument, 'r') as hashcatOutputFile:
     hashcatOutput = hashcatOutputFile.readlines()
 
 # Where the real work begins
-if exportCracked is True:
-    with open(crackedOutputfile, 'wb'):   # initializes the file since the function appends.
-        pass
 if showCombinedStats:
-    runstats('Combined',hashcatOutput, ntdsDumpCombined)
+    runstats('Combined', hashcatOutput, ntdsDumpCombined)
 if showModernStats:
-    runstats('Modern',hashcatOutput, ntdsDumpModern)
+    runstats('Modern', hashcatOutput, ntdsDumpModern)
 if showHistoryStats:
-    runstats('History',hashcatOutput, ntdsDumpHistory)
+    runstats('History', hashcatOutput, ntdsDumpHistory)
