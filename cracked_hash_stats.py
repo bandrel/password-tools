@@ -16,7 +16,7 @@ from decimal import *
 import re
 
 
-def runstats(mode,hcoutput, ntdsdump):
+def runstats(mode, hcoutput, ntdsdump):
     if ntdsdump == []:
         print 'There are no '+mode+' passwords\n'
         return
@@ -110,7 +110,7 @@ def runstats(mode,hcoutput, ntdsdump):
           'combinations not cracked: %d' % len(uncracked)
     print ''
     if outputUncracked:
-        with open(mode+'-'+uncrackedOutputfile,'w') as outputfile:
+        with open(mode+'-'+uncrackedOutputfile, 'w') as outputfile:
             for user in uncracked:
                 outputfile.write(user+'\n')
             print 'Uncracked usernames output to ' + str(uncrackedOutputfile)
@@ -130,17 +130,20 @@ def runstats(mode,hcoutput, ntdsdump):
                     if iname in name:
                         f.write(name + '\t' + crackedcreds[name][0] + '\n')
     if exportCracked is True:
-        outputcracked(mode,hcoutput, ntdsdump)
+        outputcracked(mode, hcoutput, ntdsdump)
     return
-def outputcracked(mode,hcoutput, ntdsdump):
+
+
+def outputcracked(mode, hcoutput, ntdsdump):
     history0 = re.compile(r"history0")
     dic, uncracked = credsfinder.gen_dict(ntdsdump,hcoutput)
     with open(mode+'-'+crackedOutputfile, 'w') as file:
         for username, password_hash in dic.iteritems():
             if re.search(history0, str(username)) is None:
-                line = str(username)+'\t'+str(password_hash[0])+'\n'
+                line = str(username) + '\t' + str(password_hash[0]) + '\n'
                 file.write(line)
     return
+
 
 def helpmsg():
     print 'Usage: cracked_hash_stats.py [Options] ' \
@@ -182,7 +185,7 @@ outputUncracked = False  # Print usernames with uncracked passwords
 ignoreBlankPWUsers = True  # Ignore users whose hash == blank password
 getcontext().rounding = ROUND_HALF_UP  # Configure proper rounding for decimal module
 exportCracked = False
-crackedOutputfile = 'cracked_usernames.txt'      #default filename for cracked usernames output
+crackedOutputfile = 'cracked_usernames.txt' # default filename for cracked usernames output
 gatherShared = False # Output list of users who have a shared hash
 sharedOutputFile = 'users_with_shared_hashes.txt'
 sharedHashSet = set()
@@ -193,7 +196,7 @@ interestingNames = ('admin', 'svc', 'service', 'root', 'apc', 'altiris', 'sql', 
 try:
     opts, args = getopt.getopt(sys.argv[1:], 'hm:pc:CMHu:bU:s:i:',
                                ['help', 'popular', 'popcount=', 'combined',
-                                'modern', 'history', 'uncracked=', 'blank', 'shared=','cracked-users=','interesting='])
+                                'modern', 'history', 'uncracked=', 'blank', 'shared=', 'cracked-users=', 'interesting='])
 except getopt.GetoptError as err:
     helpmsg()
     print str(err)
