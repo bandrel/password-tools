@@ -110,21 +110,21 @@ def runstats(mode,hcoutput, ntdsdump):
           'combinations not cracked: %d' % len(uncracked)
     print ''
     if outputUncracked:
-        with open(uncrackedOutputfile,'w') as outputfile:
+        with open(mode+'-'+uncrackedOutputfile,'w') as outputfile:
             for user in uncracked:
                 outputfile.write(user+'\n')
             print 'Uncracked usernames output to ' + str(uncrackedOutputfile)
     print '\n\n*************************************************************' \
           '***********************************\n\n'
     if gatherShared:
-        with open(sharedOutputFile, 'w') as f:
+        with open(mode+'-'+sharedOutputFile, 'w') as f:
             for hash in sharedHashSet:
                 for currentline in ntdsdump:
                     if hash.lower() == currentline.split(':')[1].lower():
                         f.write(currentline.split(':')[0] + '\t' + hash.lower() + '\n')
     # Write out interesting usernames and passwords
     if exportInteresting:
-        with open(interestingOutputFile, 'w') as f:
+        with open(mode+'-'+interestingOutputFile, 'w') as f:
             for iname in interestingNames:
                 for name in crackedcreds.keys():
                     if iname in name:
