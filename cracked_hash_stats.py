@@ -1,11 +1,17 @@
 #!/usr/bin/python
-__author__ = 'rleese'
-'''Processes a cracked password list from hashcat, compares it to the
-full original hash dump and spits out statstics about the cracked
+"""
+cracked_hash_stats.py processes a cracked password list from hashcat, compares
+it to the full, original hash dump, and returns statstics for the cracked
 passwords.
-Usage: cracked-hash-stats.py [hashcat cracked passwords file] [full
-hash list passwords were cracked from]
-'''
+
+Usage: cracked_hash_stats.py [Options] {<hashcat file> <ntds file>}
+If no options are specified, [-p -c 15 -M] will be used.
+Run "cracked_hash_stats.py -h" for more command information.
+
+
+The hashcat input file should have lines in the format of [hash]:[username]
+The ntds input file should have lines in the format of [username]:[hash]
+"""
 
 import sys
 import credsfinder
@@ -13,53 +19,45 @@ import getopt
 import pack.statsgen
 import collections
 from decimal import *
-import re
 
 
 def runstats(mode, hcoutput, ntdsdump):
-    if ntdsdump == []:
-        print 'There are no '+mode+' passwords\n'
+    if not ntdsdump:
+        print 'There are no ' + mode + ' passwords\n'
         return
-    print '********************************\n' \
-          '    '+mode+' Password Stats\n' \
+    print '\n********************************\n' \
+          '   ' + mode + ' Password Stats\n' \
           '********************************'
     allhashset = set()
     crackedhashset = set()
     popularpwsdict = collections.defaultdict(int)
     crackedpws = []
-    # Determine the number of unique hashes processed by placing all ntds dump
-    # lines in a set.
+    # Determine the number of unique hashes processed by placing all ntds dump lines in a set.
     for dumpline in ntdsdump:
         try:
             if dumpline.split(':')[1].lower() in allhashset:
                 sharedHashSet.add(dumpline.split(':')[1].lower())
             allhashset.add(dumpline.split(':')[1].lower())
         except IndexError:
-            print "Warning: line containing '" + dumpline + "' not processed"
+            print 'Warning: line containing "' + dumpline + '" not processed'
     uniquepwsran = len(allhashset)
 
-    # Make a dictionary of all users with cracked passwords. Username is the
-    # key. Key values are returned as [plaintextPW,hash].
+    # Make a dictionary of all users with cracked passwords. Username is the key.
+    # Key values are returned as [plaintextPW,hash].
     crackedcreds, uncracked = credsfinder.gen_dict(ntdsdump, hcoutput)
 
-    # Determine the number of unique hashes cracked by placing all hashes from
-    # the cracked Creds dictionary in to a set.
+    # Determine the number of unique hashes cracked by placing all hashes from the crackedcreds dict in to a set.
     for userCreds in crackedcreds.values():
         crackedhashset.add(userCreds[1])
-        # Track cracked passwords (including duplicates) for running PACK
-        # stats.
+        # Track cracked PWs (including duplicates) for running PACK stats.
         crackedpws.append(userCreds[0])
-        # Make a dictionary showing how many times each cracked password has
-        # been used.
-        if showPopularPasswords:
-            cleartextpw = userCreds[0]
-            popularpwsdict[cleartextpw] += 1
+        # Make a dict showing how many times each cracked password has been used.
+        cleartextpw = userCreds[0]
+        popularpwsdict[cleartextpw] += 1
 
     uniquepwscracked = len(crackedhashset)
-    # Determine the number of username/hash combos processed.
-    userpwcombossran = len(ntdsdump)
-    # Determine the number of username/hash combos cracked.
-    userpwcomboscracked = len(crackedcreds)
+    userpwcombossran = len(ntdsdump)  # Determine the number of username/hash combos processed.
+    userpwcomboscracked = len(crackedcreds)  # Determine the number of username/hash combos cracked.
     try:
         uniquepercentcracked = Decimal(str(float(uniquepwscracked) / uniquepwsran))
     except ZeroDivisionError:
@@ -74,35 +72,27 @@ def runstats(mode, hcoutput, ntdsdump):
           '(includes duplicate passwords across multiple users)\n'.format(
               userpwcomboscracked, userpwcombossran, percentcracked)
 
-    if ignoreHistory0:
-        print '%d "history0" hashes ignored' % history0hashes
+    print '%d "history0" hashes ignored' % history0hashes
     if ignoreBlankPWUsers:
         print '%d users with hashes of blank passwords ignored\n' % blankPWUsers
-    if showPopularPasswords:
-        # Print the stats. These final blocks could easily be broken in to a
-        # separate funtion, and instead have this function return uniquepwsran,
-        # uniquepwscracked, userpwcombossran, userpwcomboscracked,
-        # popularpwsdict.
 
-        # Print the top popular passwords.
-        print 'Top %d popular passwords:' % popularPasswordCount
-        print '\n                               Password | Usage Count'
-        print '                              ------------------------'
-        # Process and sort the passwords in popularPasswords dictionary
-        toppwkeys = sorted(
-            popularpwsdict.keys(), key=popularpwsdict.get, reverse=True)
-        for count in xrange(popularPasswordCount):
-            try:
-                print '%40s: %d' % (
-                    toppwkeys[count].rstrip(),
-                    popularpwsdict[toppwkeys[count]])
-            except IndexError:
-                print '\nInfo: Not enough unique cracked passwords ' \
-                      'available to fully fill the popular passwords list\n\n'
-                break
+    print 'Top %d popular passwords:' % popularPasswordCount
+    print '\n                               Password | Usage Count'
+    print '                              ------------------------'
+    # Process and sort the passwords in popularPasswords dictionary.
+    toppwkeys = sorted(
+        popularpwsdict.keys(), key=popularpwsdict.get, reverse=True)
+    for count in xrange(popularPasswordCount):
+        try:
+            print '%40s: %d' % (
+                toppwkeys[count].rstrip(),
+                popularpwsdict[toppwkeys[count]])
+        except IndexError:
+            print '\nInfo: Not enough unique cracked passwords ' \
+                  'available to fully fill the popular passwords list\n\n'
+            break
 
-    # Run the PACK-0.0.4 statsgen to give stats about
-    # password length/complexity/character sets/etc.
+    # Run the PACK-0.0.4 statsgen to give stats about password length/complexity/character sets/etc.
     statsgen = pack.statsgen.StatsGen()
     statsgen.generate_stats(crackedpws)
     statsgen.print_stats(uniquepwscracked)
@@ -110,93 +100,94 @@ def runstats(mode, hcoutput, ntdsdump):
           'combinations not cracked: %d' % len(uncracked)
     print ''
     if outputUncracked:
-        with open(mode+'-'+uncrackedOutputfile, 'w') as outputfile:
+        with open(mode + '-' + uncrackedOutputfile, 'w') as outputfile:
             for user in uncracked:
-                outputfile.write(user+'\n')
+                outputfile.write(user + '\n')
             print 'Uncracked usernames output to ' + str(uncrackedOutputfile)
     print '\n\n*************************************************************' \
           '***********************************\n\n'
-    if gatherShared:
+    if writeOutShared:
         with open(mode+'-'+sharedOutputFile, 'w') as f:
-            for hash in sharedHashSet:
+            for sharedHash in sharedHashSet:
                 for currentline in ntdsdump:
-                    if hash.lower() == currentline.split(':')[1].lower():
-                        f.write(currentline.split(':')[0] + '\t' + hash.lower() + '\n')
-    # Write out interesting usernames and passwords
-    if exportInteresting:
-        with open(mode+'-'+interestingOutputFile, 'w') as f:
+                    if sharedHash.lower() == currentline.split(':')[1].lower():
+                        f.write(currentline.split(':')[0] + '\t' + sharedHash.lower() + '\n')
+    # Write out usernames & passwords of users that match the "interestingNames" contents.
+    if writeOutInteresting:
+        with open(mode + '-' + interestingOutputFile, 'w') as f:
             for iname in interestingNames:
                 for name in crackedcreds.keys():
                     if iname in name:
                         f.write(name + '\t' + crackedcreds[name][0] + '\n')
-    if exportCracked is True:
+    if writeOutCracked is True:
         outputcracked(mode, hcoutput, ntdsdump)
     return
 
 
 def outputcracked(mode, hcoutput, ntdsdump):
-    history0 = re.compile(r"history0")
-    dic, uncracked = credsfinder.gen_dict(ntdsdump,hcoutput)
-    with open(mode+'-'+crackedOutputfile, 'w') as file:
+    dic, uncracked = credsfinder.gen_dict(ntdsdump, hcoutput)
+    with open(mode + '-' + crackedOutputfile, 'w') as output_file:
         for username, password_hash in dic.iteritems():
-            if re.search(history0, str(username)) is None:
-                line = str(username) + '\t' + str(password_hash[0]) + '\n'
-                file.write(line)
+            if 'history0' in username:
+                output_line = str(username) + '\t' + str(password_hash[0]) + '\n'
+                output_file.write(output_line)
     return
 
 
 def helpmsg():
-    print 'Usage: cracked_hash_stats.py [Options] ' \
-          '{<hashcat file> <ntds file>}\n' \
-          ' Note:  If no options are specified [-p -c 15 -M -H] will be ' \
-          'used\n' \
-          '  -h or --help:  This help screen\n' \
-          '  -p or --popular: Prints a list of most popular passwords.\n' \
-          '                   Defaults to top 100.  Use -c to change ' \
-          'count.\n' \
-          '  -c or --popcount: Changes the default number of popular\n' \
-          '                    passwords output when using the -p option\n' \
-          '  -M or --modern: Prints the statistics for current passwords. \n' \
-          '  -H or --history: Prints the statistics for history passwords\n' \
-          '  -C or --combined: Shows statistics for both current and ' \
-          '                    historical passwords\n'\
-          '  -u or --uncracked <file>: Output the cracked uncracked usernames to\n' \
-          '                            the file specified\n'\
-          '  -b or --blank: Includes users with hashes of blank passwords\n'\
-          '  -U or --cracked-users <file>: Output the cracked usernames to the\n' \
-          '                                file specified\n'\
-          '  -s or --shared <file>: output a file with users who do not have a\n' \
-          '                         unique password hash\n' \
-          '  -i or --interesting <file>: output a file of cracked account with\n' \
-          '                              with usernames that could be more\n' \
-          '                              valuable than average i.e. admin, root\n' \
-          '                              svc, sql, etc'
+    print '\ncracked_hash_stats.py processes a cracked password list from hashcat, compares\n' \
+          'it to the full, original hash dump, and returns statstics for the cracked\n' \
+          'passwords.\n' \
+          '\n' \
+          'Usage: cracked_hash_stats.py [Options] {<hashcat file> <ntds file>}\n' \
+          'If no options are specified, [-p -c 15 -M] will be used\n' \
+          '\n' \
+          'The hashcat file should have lines in the format of [hash]:[username]\n' \
+          'The ntds file should have lines in the format of [username]:[hash]\n' \
+          '\n' \
+          'Options:\n' \
+          '\n' \
+          '    Modes:\n' \
+          '        -M or --modern: Print statistics for current passwords.\n' \
+          '        -H or --history: Print statistics for history passwords\n' \
+          '        -C or --combined: Print combined statistics of current and history users\n ' \
+          '\n' \
+          '    File Output:\n'\
+          '        -U or --cracked-users <file>: Write cracked usernames to a file.\n'\
+          '        -u or --uncracked <file>: Write uncracked usernames to a file.\n' \
+          '        -s or --shared <file>: Write a file with users who do not have a unique\n' \
+          '            password hash.\n' \
+          '        -i or --interesting <file>: Write a file of cracked usernames that\n' \
+          '            could be more valuable than average i.e. admin, root, svc, sql, etc\n' \
+          '\n' \
+          '    Other:\n' \
+          '        -c or --popcount <count>: Set number of popular passwords output.\n' \
+          '        -b or --blank: Include users with hashes of blank passwords in the statistics\n' \
+          '            processing.\n' \
+          '        -h or --help:  Show this help screen.\n'
     return
 
-
-# Set defaults if command arguments are not used
-showPopularPasswords = True  # List top x most popular passwords
 popularPasswordCount = 15
-ignoreHistory0 = True  # Ignore history0 entries *_history0 hashes
 showModernStats = None  # Show a stats block for current passwords
 showHistoryStats = None  # Show a stats block for history passwords
-showCombinedStats = None  # Combine stats of both modern and history passwords
-outputUncracked = False  # Print usernames with uncracked passwords
+showCombinedStats = None  # Show stats of both modern and history passwords combined
 ignoreBlankPWUsers = True  # Ignore users whose hash == blank password
-getcontext().rounding = ROUND_HALF_UP  # Configure proper rounding for decimal module
-exportCracked = False
-crackedOutputfile = 'cracked_usernames.txt' # default filename for cracked usernames output
-gatherShared = False  # Output list of users who have a shared hash
+getcontext().rounding = ROUND_HALF_UP  # Configure proper rounding for the decimal module
+
+outputUncracked = False  # Output a list of usernames with uncracked passwords
+writeOutCracked = False  # Output a list of cracked usernames and passwords
+crackedOutputfile = 'cracked_usernames.txt'
+writeOutShared = False  # Output a list of users who have a shared hash
 sharedOutputFile = 'users_with_shared_hashes.txt'
 sharedHashSet = set()
-exportInteresting = False
+writeOutInteresting = False  # Output a list of users that meet the interesing criteria
 interestingOutputFile = 'interesting_cracked_users.txt'
 interestingNames = ('admin', 'svc', 'service', 'root', 'apc', 'altiris', 'sql', 'manage', 'cisco')
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], 'hm:pc:CMHu:bU:s:i:',
-                               ['help', 'popular', 'popcount=', 'combined',
-                                'modern', 'history', 'uncracked=', 'blank', 'shared=', 'cracked-users=', 'interesting='])
+    opts, args = getopt.getopt(sys.argv[1:], 'hm:c:CMHu:bU:s:i:',
+                               ['help', 'popcount=', 'combined', 'modern', 'history',
+                                'uncracked=', 'blank', 'shared=', 'cracked-users=', 'interesting='])
 except getopt.GetoptError as err:
     helpmsg()
     print str(err)
@@ -205,8 +196,6 @@ for opt, arg in opts:
     if opt in ('-h', '--help'):
         helpmsg()
         sys.exit()
-    elif opt in ('-p', '--popular'):
-        showPopularPasswords = True
     elif opt in ('-c', '--popcount'):
         popularPasswordCount = int(arg)
     elif opt in ('-C', '--combined'):
@@ -221,13 +210,13 @@ for opt, arg in opts:
     elif opt in ('-b', '--blank'):
         ignoreBlankPWUsers = False
     elif opt in ('-U', '--cracked-users'):
-        exportCracked = True
+        writeOutCracked = True
         crackedOutputfile = arg
     elif opt in ('-s', '--shared'):
-        gatherShared = True
+        writeOutShared = True
         sharedOutputFile = arg
     elif opt in ('-i', '--interesting'):
-        exportInteresting = True
+        writeOutInteresting = True
         interestingOutputFile = arg
 try:
     hashcatOutputArgument = args[0]
@@ -235,21 +224,22 @@ try:
 except IndexError:
     helpmsg()
     sys.exit(2)
-# Initialize global variables defaults
+
+# Intialize global variables
 ntdsDumpCombined = []
 ntdsDumpModern = []
 ntdsDumpHistory = []
 history0hashes = 0
 blankPWUsers = 0
 
-# Run modern stats if no mode is specified
-if not(showModernStats and showCombinedStats and showHistoryStats):
+# Run modern stats if no mode is specified.
+if not(showModernStats or showCombinedStats or showHistoryStats):
     showModernStats = True
-# Create processed ntds dumps based on the options specified above. These
-# will be input in to runstats() .
+
+# Create processed ntds dumps based on the options specified above. These will be given to runstats()
 with open(ntdsDumpArgument, 'r') as ntdsDumpFile:
     for line in ntdsDumpFile.readlines():
-        if ignoreHistory0 and line.find('_nthistory0') > -1:
+        if line.find('_nthistory0') > -1:
             history0hashes += 1
         else:
             if ignoreBlankPWUsers:
@@ -266,11 +256,10 @@ with open(ntdsDumpArgument, 'r') as ntdsDumpFile:
                     ntdsDumpHistory.append(line.rstrip())
 
 
-# Prepare contents of the hashcat output file for multiple uses
+# Prepare contents of the hashcat output file for multiple uses.
 with open(hashcatOutputArgument, 'r') as hashcatOutputFile:
     hashcatOutput = hashcatOutputFile.readlines()
 
-# Where the real work begins
 if showCombinedStats:
     runstats('Combined', hashcatOutput, ntdsDumpCombined)
 if showModernStats:
