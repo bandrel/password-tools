@@ -128,7 +128,7 @@ def outputcracked(mode, hcoutput, ntdsdump):
     dic, uncracked = credsfinder.gen_dict(ntdsdump, hcoutput)
     with open(mode + '-' + crackedOutputfile, 'w') as output_file:
         for username, password_hash in dic.iteritems():
-            if 'history0' in username:
+            if not 'history0' in username:
                 output_line = str(username) + '\t' + str(password_hash[0]) + '\n'
                 output_file.write(output_line)
     return
