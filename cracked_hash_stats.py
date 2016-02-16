@@ -178,9 +178,9 @@ def helpmsg():
 showPopularPasswords = True  # List top x most popular passwords
 popularPasswordCount = 15
 ignoreHistory0 = True  # Ignore history0 entries *_history0 hashes
-showModernStats = True  # Show a stats block for current passwords
-showHistoryStats = False  # Show a stats block for history passwords
-showCombinedStats = False  # Combine stats of both modern and history passwords
+showModernStats = None  # Show a stats block for current passwords
+showHistoryStats = None  # Show a stats block for history passwords
+showCombinedStats = None  # Combine stats of both modern and history passwords
 outputUncracked = False  # Print usernames with uncracked passwords
 ignoreBlankPWUsers = True  # Ignore users whose hash == blank password
 getcontext().rounding = ROUND_HALF_UP  # Configure proper rounding for decimal module
@@ -242,6 +242,9 @@ ntdsDumpHistory = []
 history0hashes = 0
 blankPWUsers = 0
 
+# Run modern stats if no mode is specified
+if not(showModernStats and showCombinedStats and showHistoryStats):
+    showModernStats = True
 # Create processed ntds dumps based on the options specified above. These
 # will be input in to runstats() .
 with open(ntdsDumpArgument, 'r') as ntdsDumpFile:
