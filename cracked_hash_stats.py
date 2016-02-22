@@ -99,7 +99,7 @@ def runstats(mode, hcoutput, ntdsdump):
     print '\nTotal number of user/password ' \
           'combinations not cracked: %d' % len(uncracked)
     print ''
-    if outputUncracked:
+    if writeOutUncracked:
         with open(mode + '-' + uncrackedOutputfile, 'w') as outputfile:
             for user in uncracked:
                 outputfile.write(user + '\n')
@@ -174,14 +174,11 @@ showCombinedStats = None  # Show stats of both modern and history passwords comb
 ignoreBlankPWUsers = True  # Ignore users whose hash == blank password
 getcontext().rounding = ROUND_HALF_UP  # Configure proper rounding for the decimal module
 
-outputUncracked = False  # Output a list of usernames with uncracked passwords
+writeOutUncracked = False  # Output a list of usernames with uncracked passwords
 writeOutCracked = False  # Output a list of cracked usernames and passwords
-crackedOutputfile = 'cracked_usernames.txt'
 writeOutShared = False  # Output a list of users who have a shared hash
-sharedOutputFile = 'users_with_shared_hashes.txt'
 sharedHashSet = set()
 writeOutInteresting = False  # Output a list of users that meet the interesing criteria
-interestingOutputFile = 'interesting_cracked_users.txt'
 interestingNames = ('admin', 'svc', 'service', 'root', 'apc', 'altiris', 'sql', 'manage', 'cisco')
 
 try:
@@ -205,7 +202,7 @@ for opt, arg in opts:
     elif opt in ('-H', '--history'):
         showHistoryStats = True
     elif opt in ('-u', '--uncracked'):
-        outputUncracked = True
+        writeOutUncracked = True
         uncrackedOutputfile = arg
     elif opt in ('-b', '--blank'):
         ignoreBlankPWUsers = False
