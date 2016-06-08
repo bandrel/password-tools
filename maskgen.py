@@ -69,14 +69,3 @@ else:
     print('--------------------')
     for item in items:
         print item[0]
-
-
-
-
-
-
-
-
-
-
-
